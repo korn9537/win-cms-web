@@ -1,0 +1,9 @@
+export const APP_PATH_HISTORY: string = "/history";
+export const APP_PATH_HOME: string = "/companies";
+export const APP_PATH_LOGIN: string = "/login";
+export const APP_PATH_LOGOUT: string = "/logout";
+export const APP_PATH_REGISTER: string = "/register";
+export const APP_PATH_SETTINGS: string = "/settings";
+export const APP_PATH_USER: string = "/user";
+export const APP_PATH_USER_EDIT: string = "/user/edit";
+export const APP_PATH_USER_PASSWORD: string = "/user/password";

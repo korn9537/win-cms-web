@@ -1,0 +1,22 @@
+body,
+html {
+  min-height: 100vh;
+  color: #333;
+}
+
+.MuiTableCell-head {
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 22px; /* 157.143% */
+}
+
+.MuiTableContainer-root.MuiPaper-root:not(.MuiPaper-elevation0) {
+  box-shadow: 0px 1px 8px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
