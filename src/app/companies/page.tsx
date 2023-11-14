@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import ImageCard from "./components/ImageCard";
 import { useModuleLayoutStore } from "@/stores/module-layout.store";
 import { useEffect } from "react";
-import CleanContentBox from "@/components/CleanContentBox";
 
 export default function CompanySelectPage() {
   // static
@@ -42,32 +41,30 @@ export default function CompanySelectPage() {
   };
 
   return (
-    <CleanContentBox appMenuSize="hidden">
-      <PageLayout type="detail">
-        <Container>
-          <Stack spacing={SPACING_LAYOUT}>
-            <PageToolbar
-              title="เลือกบริษัท"
-              actions={<ButtonAdd text="เพิ่มบริษัท" onClick={handleOnClickAdd} />}
-              disableMargin
-            />
-            <Box>
-              <Grid container spacing={SPACING_LAYOUT}>
-                {query.data?.map((company) => (
-                  <Grid key={company.id} item xs={4}>
-                    <ImageCard
-                      src={company.logo_image_url}
-                      title={company.name_th}
-                      description="รายละเอียดเพิ่มเติม"
-                      onClick={handleOnClick(company.code)}
-                    />
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          </Stack>
-        </Container>
-      </PageLayout>
-    </CleanContentBox>
+    <PageLayout type="detail">
+      <Container>
+        <Stack spacing={SPACING_LAYOUT}>
+          <PageToolbar
+            title="เลือกบริษัท"
+            actions={<ButtonAdd text="เพิ่มบริษัท" onClick={handleOnClickAdd} />}
+            disableMargin
+          />
+          <Box>
+            <Grid container spacing={SPACING_LAYOUT}>
+              {query.data?.map((company) => (
+                <Grid key={company.id} item xs={4}>
+                  <ImageCard
+                    src={company.logo_image_url}
+                    title={company.name_th}
+                    description="รายละเอียดเพิ่มเติม"
+                    onClick={handleOnClick(company.code)}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        </Stack>
+      </Container>
+    </PageLayout>
   );
 }

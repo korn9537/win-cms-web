@@ -1,8 +1,5 @@
 import { redirect } from "next/navigation";
-import React from "react";
 
-export default function page() {
+export default function CompanyIndexPage() {
   redirect("/companies");
-
-  return <div>page</div>;
 }

@@ -38,6 +38,7 @@ export default function BoqIndexPage(props: BoqIndexPageProps) {
   return (
     <PageLayout
       type="list"
+      appMenuSize="large"
       toolbar={{
         title: "เลือกโครงการ"
       }}

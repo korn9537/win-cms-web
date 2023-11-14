@@ -1,6 +1,5 @@
 "use client";
 
-import CleanContentBox from "@/components/CleanContentBox";
 import PageLayout from "@/components/PageLayout";
 import SwitchStatus from "@/components/SwitchStatus";
 import FormContainer from "@/components/forms/FormContainer";
@@ -109,25 +108,23 @@ export default function CompanyCreatePage() {
   };
 
   return (
-    <CleanContentBox>
-      <PageLayout
-        type="detail"
-        toolbar={{
-          title: "เพิ่มบริษัท"
-        }}
-        onBack={handleOnBack}
-      >
-        <FormProvider {...methods}>
-          <Stack spacing={SPACING_LAYOUT}>
-            {/* Switch */}
-            <SwitchStatus />
-            {/* Form */}
-            <FormContainer title="รายละเอียดบริษัท" onSubmit={methods.handleSubmit(handleOnSubmit)}>
-              <FormCompany />
-            </FormContainer>
-          </Stack>
-        </FormProvider>
-      </PageLayout>
-    </CleanContentBox>
+    <PageLayout
+      type="detail"
+      toolbar={{
+        title: "เพิ่มบริษัท"
+      }}
+      onBack={handleOnBack}
+    >
+      <FormProvider {...methods}>
+        <Stack spacing={SPACING_LAYOUT}>
+          {/* Switch */}
+          <SwitchStatus />
+          {/* Form */}
+          <FormContainer title="รายละเอียดบริษัท" onSubmit={methods.handleSubmit(handleOnSubmit)}>
+            <FormCompany />
+          </FormContainer>
+        </Stack>
+      </FormProvider>
+    </PageLayout>
   );
 }

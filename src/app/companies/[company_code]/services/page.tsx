@@ -3,13 +3,12 @@
 import PageLayout from "@/components/PageLayout";
 import PageToolbar from "@/components/PageToolbar";
 import { SPACING_LAYOUT } from "@/constants/layout.constant";
+import { CompanyModel } from "@/services/graphql/models/company.model";
+import { useModuleLayoutStore } from "@/stores/module-layout.store";
 import { Container, Grid } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { ServiceCard } from "./components/ServiceCard";
-import { useModuleLayoutStore } from "@/stores/module-layout.store";
-import { CompanyModel } from "@/services/graphql/models/company.model";
 import { MODULE_MENUS } from "../../layout";
-import CleanContentBox from "@/components/CleanContentBox";
+import { ServiceCard } from "./components/ServiceCard";
 
 type ServiceSelectPageProps = {
   params: {
@@ -28,24 +27,22 @@ export default function ServiceSelectPage(props: ServiceSelectPageProps) {
   };
 
   return (
-    <CleanContentBox appMenuSize="hidden">
-      <PageLayout type="detail" hiddenMenu>
-        <Container>
-          <PageToolbar title={company.name_th} backFunction={() => router.push("/companies")} />
-          <Grid container spacing={SPACING_LAYOUT}>
-            {MODULE_MENUS.map((menu) => (
-              <Grid key={menu.key} item xs={4}>
-                <ServiceCard
-                  title={menu.title}
-                  description={menu.description}
-                  image={menu.image}
-                  onClick={() => handleOnClick(menu.href || "")}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </PageLayout>
-    </CleanContentBox>
+    <PageLayout type="detail">
+      <Container>
+        <PageToolbar title={company.name_th} backFunction={() => router.push("/companies")} />
+        <Grid container spacing={SPACING_LAYOUT}>
+          {MODULE_MENUS.map((menu) => (
+            <Grid key={menu.key} item xs={4}>
+              <ServiceCard
+                title={menu.title}
+                description={menu.description}
+                image={menu.image}
+                onClick={() => handleOnClick(menu.href || "")}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+    </PageLayout>
   );
 }

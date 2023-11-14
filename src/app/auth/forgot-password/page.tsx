@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import AlertDialog from '@/components/dialogs/AlertDialog';
-import { useDialog } from '@/hooks/useDialog';
-import { CheckCircleOutlined } from '@mui/icons-material';
-import { Box, Button, Stack, TextField, Typography, useTheme } from '@mui/material';
-import { useRouter } from 'next/navigation';
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import AlertDialog from "@/components/dialogs/AlertDialog";
+import { useDialog } from "@/hooks/useDialog";
+import { CheckCircleOutlined } from "@mui/icons-material";
+import { Box, Button, Stack, TextField, Typography, useTheme } from "@mui/material";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { useForm } from "react-hook-form";
 
 type FormValues = {
   username: string;
@@ -18,15 +18,15 @@ export default function ForgotPasswordPage() {
 
   const dialog = useDialog({
     onConfirm(data, dialog, res) {
-      console.log('confirm', data);
+      console.log("confirm", data);
       dialog.close();
 
-      router.push('/auth/login');
+      router.push("/auth/login");
     },
     onCancel(data, dialog) {
-      console.log('cancel', data);
+      console.log("cancel", data);
       dialog.close();
-    },
+    }
   });
 
   const {
@@ -34,8 +34,8 @@ export default function ForgotPasswordPage() {
     handleSubmit,
     formState: { errors },
     watch,
-    setValue,
-  } = useForm<FormValues>({ defaultValues: { username: 'user@mbsbiz.co.th' } });
+    setValue
+  } = useForm<FormValues>({ defaultValues: { username: "user@mbsbiz.co.th" } });
 
   const handleOnSubmit = handleSubmit((data) => {
     console.log(data);
@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
         <Typography variant="body_M" display="block" color="neutralGray.main">
           (หากอีเมลไม่ตรงกับบัญชีผู้ใช้ในระบบ ระบบจะไม่ส่งอีเมลไปถึงคุณ)
         </Typography>
-      </Box>,
+      </Box>
     );
   });
 
@@ -92,9 +92,9 @@ export default function ForgotPasswordPage() {
             <TextField
               placeholder="อีเมล"
               fullWidth
-              {...register('username', { required: true })}
+              {...register("username", { required: true })}
               error={Boolean(errors.username)}
-              helperText={errors.username && 'บัญชีผู้ใช้ไม่ถูกต้อง'}
+              helperText={errors.username && "บัญชีผู้ใช้ไม่ถูกต้อง"}
             />
           </Box>
           <Button variant="contained" type="submit" color="primary" size="large">
@@ -105,7 +105,7 @@ export default function ForgotPasswordPage() {
         </Typography> */}
         </Stack>
       </Box>
-      <AlertDialog {...dialog.dialogProps} buttonConfirmText="กลับไปหน้าเข้าสู่ระบบ" />
+      {/* <AlertDialog {...dialog.dialogProps} buttonConfirmText="กลับไปหน้าเข้าสู่ระบบ" /> */}
     </React.Fragment>
   );
 }

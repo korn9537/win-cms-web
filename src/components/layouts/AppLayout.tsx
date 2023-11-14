@@ -85,10 +85,6 @@ export default function AppLayout(props: AppLayoutProps) {
   const menuList = props.menus || menus || [];
   const hasMenu = menuSize != "hidden" && menuList.length > 0;
 
-  console.log({
-    menuSize
-  });
-
   return (
     <Box
       sx={{

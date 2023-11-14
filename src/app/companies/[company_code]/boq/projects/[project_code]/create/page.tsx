@@ -1,6 +1,5 @@
 "use client";
 
-import CleanContentBox from "@/components/CleanContentBox";
 import { IconFile, IconImport, IconUpload } from "@/components/Icons";
 import PageLayout from "@/components/PageLayout";
 import FormWizardAction from "@/components/forms/FormWizardAction";
@@ -72,7 +71,7 @@ export default function ProjectBoqCreatePage(props: ProjectBoqCreatePageProps) {
   };
 
   return (
-    <CleanContentBox>
+    <>
       <PageLayout
         type="detail"
         toolbar={{
@@ -202,6 +201,6 @@ export default function ProjectBoqCreatePage(props: ProjectBoqCreatePageProps) {
           </>
         }
       />
-    </CleanContentBox>
+    </>
   );
 }
