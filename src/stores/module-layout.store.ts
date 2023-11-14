@@ -1,41 +1,37 @@
-import { KEY_MENU_MODULE_SIZE } from '@/constants/layout.constant';
-import { ICompanyDetail } from '@/interfaces/company-detail.interface';
-import { IProjectDetail } from '@/interfaces/project-interface-detail';
-import { IUnitSaleOrder } from '@/interfaces/unit.interface';
-import Cookies from 'js-cookie';
-import { create } from 'zustand';
+import { MyMenu } from "@/components/layouts/AppMenu";
+import { KEY_MENU_MODULE_SIZE } from "@/constants/layout.constant";
+import Cookies from "js-cookie";
+import { create } from "zustand";
+import { MenuSizeType } from "./layout.store";
 
-const COOKIE_SELECT_MENU_NAME = 'mbs:win:module-layout:selected-menu';
-
-type MenuSizeType = 'small' | 'large';
+const COOKIE_SELECT_MENU_NAME = "mbs:win:module-layout:selected-menu";
 
 export interface ModuleLayoutState {
   isCleanLayout: boolean;
+  menus: MyMenu[];
   menuSize: MenuSizeType;
   openedMenus: string[];
   selectedMenu: string;
-  data: ICompanyDetail | IProjectDetail | IUnitSaleOrder | null;
+  data: any;
   dataUpdatedAt: number;
   dataQueryKeys: string[];
 
   // methods
   toggleCleanLayout: (value: boolean) => void;
-  toggleMenuSize: () => void;
+  toggleMenuSize: (size?: MenuSizeType) => void;
   toggleMenuOpened: (menu: string) => void;
   setSelectMenu: (menu: string) => void;
-  setData: (
-    data?: ICompanyDetail | IProjectDetail | IUnitSaleOrder | any | null,
-    dataUpdatedAt?: number,
-    dataQueryKeys?: string[],
-  ) => void;
+  setData: (data?: any, dataUpdatedAt?: number, dataQueryKeys?: string[]) => void;
   reset: () => void;
+  setMenus: (menus: MyMenu[]) => void;
 }
 
 export const useModuleLayoutStore = create<ModuleLayoutState>((set, get) => ({
   isCleanLayout: false,
-  menuSize: (Cookies.get(KEY_MENU_MODULE_SIZE) as MenuSizeType) || 'large',
+  menus: [],
+  menuSize: (Cookies.get(KEY_MENU_MODULE_SIZE) as MenuSizeType) || "large",
   openedMenus: [],
-  selectedMenu: '',
+  selectedMenu: "",
   data: null,
   dataUpdatedAt: 0,
   dataQueryKeys: [],
@@ -44,13 +40,19 @@ export const useModuleLayoutStore = create<ModuleLayoutState>((set, get) => ({
     set({ isCleanLayout: value });
   },
 
-  toggleMenuSize: () => {
-    const value = get().menuSize === 'large' ? 'small' : 'large';
+  toggleMenuSize: (size?: MenuSizeType) => {
+    const currentSize = get().menuSize;
+
+    if (currentSize === size) {
+      return;
+    }
+
+    const value = size ? size : currentSize === "large" ? "small" : "large";
     //
     Cookies.set(KEY_MENU_MODULE_SIZE, value);
     //
     set((state) => ({
-      menuSize: value,
+      menuSize: value
     }));
   },
 
@@ -70,17 +72,21 @@ export const useModuleLayoutStore = create<ModuleLayoutState>((set, get) => ({
     set({ selectedMenu: menu });
   },
 
-  setData: (data?: ICompanyDetail | IProjectDetail | any | null, dataUpdatedAt?: number, dataQueryKeys?: string[]) => {
+  setData: (data?: any, dataUpdatedAt?: number, dataQueryKeys?: string[]) => {
     set({ data, dataUpdatedAt, dataQueryKeys });
   },
 
   reset: () => {
     set({
       isCleanLayout: false,
-      menuSize: 'large',
+      menuSize: "large",
       openedMenus: [],
-      selectedMenu: '',
-      data: null,
+      selectedMenu: "",
+      data: null
     });
   },
+
+  setMenus: (menus: MyMenu[]) => {
+    set({ menus });
+  }
 }));

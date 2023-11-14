@@ -1,6 +1,8 @@
 "use client";
 
+import { CompanyModel } from "@/services/graphql/models/company.model";
 import { useAuthStore } from "@/stores/auth.store";
+import { useModuleLayoutStore } from "@/stores/module-layout.store";
 import { LockOutlined, LogoutOutlined } from "@mui/icons-material";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
@@ -67,6 +69,8 @@ export default function AppNavbar({ hideModuleSelector = false, ...props }: AppN
     role: state.role
   }));
 
+  const company = useModuleLayoutStore((state) => state.data as CompanyModel);
+
   // useEffect(() => {
   //   if (!is_authenticated) {
   //     const token = localStorage.getItem(KEY_SESSION);
@@ -120,7 +124,7 @@ export default function AppNavbar({ hideModuleSelector = false, ...props }: AppN
     >
       <Box sx={{ flexGrow: 1, px: 2, display: "flex", justifyContent: "space-between" }}>
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Typography variant="body_M_B">เอ็ม บี เอส พร้อพเพอร์ตี้</Typography>
+          {company && <Typography variant="body_M_B">{company.name_th}</Typography>}
         </Stack>
         <Stack direction="row" alignItems="center" spacing={2}>
           {/* Chat, Noti, Lang */}
@@ -137,21 +141,21 @@ export default function AppNavbar({ hideModuleSelector = false, ...props }: AppN
           </Stack>
           <Divider orientation="vertical" flexItem />
           {/* Credit */}
-          <Stack direction="row" spacing={0.5}>
+          {/* <Stack direction="row" spacing={0.5}>
             <Image alt="coin" src="/icons/Coin.png" width={24} height={24} />
             <Typography fontSize={15}>50,000,000</Typography>
             <ButtonBase sx={{ p: 0.5 }}>
               <AddCircleOutlineOutlinedIcon sx={{ width: 16, height: 16, color: "#1A73E8" }} />
             </ButtonBase>
           </Stack>
-          <Divider orientation="vertical" flexItem />
+          <Divider orientation="vertical" flexItem /> */}
           {/* Account */}
           <Box>
             <ButtonBase sx={{ display: "flex", alignItems: "center", gap: 2 }} onClick={handleOpenUserMenu}>
               <Avatar alt="user" src="/icons/User.png" sx={{ width: 32, height: 32 }} />
               <Box>
                 <Typography fontSize={15} fontWeight={700}>
-                  {profile?.name}
+                  {profile?.fullname}
                 </Typography>
                 <Typography fontSize={13} color="#8E8E8E">
                   {role}

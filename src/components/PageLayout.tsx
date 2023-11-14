@@ -43,7 +43,7 @@ function isPageFilterProps(obj: any): obj is PageFilterProps {
 
 export default function PageLayout(props: PageLayoutProps) {
   // statics
-  const toggleMenuSize = useLayoutStore((state) => state.toggleMenuSize);
+  // const toggleMenuSize = useLayoutStore((state) => state.toggleMenuSize);
 
   // states
   const [contentScrollTop, setContentScrollTop] = useState(0);
@@ -69,17 +69,17 @@ export default function PageLayout(props: PageLayoutProps) {
     };
   }, [contentRef.current]);
 
-  useEffect(() => {
-    if (props.hiddenMenu) {
-      toggleMenuSize("hidden");
-    }
+  // useEffect(() => {
+  //   if (props.hiddenMenu) {
+  //     toggleMenuSize("hidden");
+  //   }
 
-    return () => {
-      if (props.hiddenMenu) {
-        toggleMenuSize("large");
-      }
-    };
-  }, [props.hiddenMenu]);
+  //   return () => {
+  //     if (props.hiddenMenu) {
+  //       toggleMenuSize("large");
+  //     }
+  //   };
+  // }, [props.hiddenMenu]);
 
   // actions
 

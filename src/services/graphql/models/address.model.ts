@@ -1,0 +1,26 @@
+export type AddressModel = {
+  country?: string;
+  address_th: string;
+  village_th: string;
+  moo_th: string;
+  tower_th: string;
+  floor_th: string;
+  soi_th: string;
+  road_th: string;
+  address_en: string;
+  moo_en: string;
+  village_en: string;
+  tower_en: string;
+  floor_en: string;
+  soi_en: string;
+  road_en: string;
+  sub_district_id: string;
+  district_id: string;
+  province_id: string;
+  zip_code: number | string;
+  contact_mobile?: string;
+  web_site?: string;
+  latitude?: number;
+  longitude?: number;
+  google_map_url?: string;
+};

@@ -6,11 +6,12 @@ import { KEY_SESSION } from "@/configs/app.config";
 import { ASIDE_WIDTH_LG, ASIDE_WIDTH_SM } from "@/constants/layout.constant";
 import { useAuthStore } from "@/stores/auth.store";
 import { useLayoutStore } from "@/stores/layout.store";
-import { Backdrop, Box, CircularProgress, Stack, useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { useSelectedLayoutSegment, useSelectedLayoutSegments } from "next/navigation";
 import { useEffect } from "react";
-import AppMenu, { MyMenu } from "./AppMenu";
 import AppBackdrop from "./AppBackdrop";
+import AppMenu, { MyMenu } from "./AppMenu";
+import axios from "axios";
 
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -36,11 +37,15 @@ export default function AppLayout(props: AppLayoutProps) {
     is_authenticated: state.is_authenticated,
     is_loading: state.is_loading,
     is_loaded: state.is_loaded,
-    loadProfile: state.loadProfile
+    loadProfile: state.loadProfile,
+    loading: state.loading
   }));
 
   // aside
-  const menuSize = useLayoutStore((state) => state.menuSize);
+  const { menuSize, menus } = useLayoutStore((state) => ({
+    menuSize: state.menuSize,
+    menus: state.menus
+  }));
 
   useEffect(() => {
     if (!props.requireAuth) {
@@ -51,12 +56,13 @@ export default function AppLayout(props: AppLayoutProps) {
     if (!auth.is_authenticated) {
       const token = localStorage.getItem(KEY_SESSION);
       if (token) {
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         auth.loadProfile(token);
       } else {
         window.location.href = "/auth/login";
       }
     }
-  }, [props.requireAuth]);
+  }, [props.requireAuth, auth.is_loading]);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -76,7 +82,12 @@ export default function AppLayout(props: AppLayoutProps) {
   }
 
   // aside
-  const hasMenu = menuSize != "hidden" && props.menus && props.menus.length > 0;
+  const menuList = props.menus || menus || [];
+  const hasMenu = menuSize != "hidden" && menuList.length > 0;
+
+  console.log({
+    menuSize
+  });
 
   return (
     <Box
@@ -95,7 +106,7 @@ export default function AppLayout(props: AppLayoutProps) {
           }}
         >
           <AppAsideMenu>
-            <AppMenu disabledText={menuSize == "small"} menus={props.menus} value={selectedMenu} />
+            <AppMenu disabledText={menuSize == "small"} menus={menuList} value={selectedMenu} />
           </AppAsideMenu>
         </Box>
       )}

@@ -1,19 +1,59 @@
 "use client";
 
+import { MenuSizeType, useLayoutStore } from "@/stores/layout.store";
 import { useModuleLayoutStore } from "@/stores/module-layout.store";
 import { BoxProps } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-type CleanContentBoxProps = {} & BoxProps;
+type CleanContentBoxProps = {
+  appMenuSize?: MenuSizeType;
+  moduleMenuSize?: MenuSizeType;
+} & BoxProps;
 
 export default function CleanContentBox(props: CleanContentBoxProps) {
-  const toggleCleanLayout = useModuleLayoutStore((state) => state.toggleCleanLayout);
+  const moduleStore = useModuleLayoutStore((state) => ({
+    toggleCleanLayout: state.toggleCleanLayout,
+    isCleanLayout: state.isCleanLayout,
+    menuSize: state.menuSize,
+    toggleMenuSize: state.toggleMenuSize
+  }));
+
+  const layoutStore = useLayoutStore((state) => ({
+    menuSize: state.menuSize,
+    toggleMenuSize: state.toggleMenuSize
+  }));
+
+  const currentAppMenuSize = useRef(layoutStore.menuSize);
+  const currentModuleMenuSize = useRef(moduleStore.menuSize);
+  const currentModuleIsCleanLayout = useRef(moduleStore.isCleanLayout);
+
+  // console.log({
+  //   AppMenuSize: currentAppMenuSize.current,
+  //   ModuleMenuSize: currentModuleMenuSize.current,
+  //   ModuleIsCleanLayout: currentModuleIsCleanLayout.current
+  // });
 
   useEffect(() => {
-    toggleCleanLayout(true);
+    moduleStore.toggleCleanLayout(true);
+
+    if (props.appMenuSize) {
+      layoutStore.toggleMenuSize(props.appMenuSize);
+    }
+
+    if (props.moduleMenuSize) {
+      moduleStore.toggleMenuSize(props.moduleMenuSize);
+    }
 
     return () => {
-      toggleCleanLayout(false);
+      moduleStore.toggleCleanLayout(currentModuleIsCleanLayout.current);
+
+      if (props.appMenuSize) {
+        layoutStore.toggleMenuSize(currentAppMenuSize.current);
+      }
+
+      if (props.moduleMenuSize) {
+        moduleStore.toggleMenuSize(currentModuleMenuSize.current);
+      }
     };
   }, []);
 

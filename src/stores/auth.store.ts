@@ -1,27 +1,20 @@
-import { KEY_SESSION } from '@/configs/app.config';
-import { loadProfile, login, logout } from '@/services/auth-service';
-import { create } from 'zustand';
-
-interface IProfile {
-  id: string;
-  name: string;
-  username: string;
-  email?: string;
-  mobile?: string;
-  thumbnail?: string;
-}
+import { KEY_SESSION } from "@/configs/app.config";
+import { getProfile, login, logout } from "@/services/graphql/auth.service";
+import { ProfileModel } from "@/services/graphql/models/profile.model";
+import { create } from "zustand";
 
 interface AuthStore {
   is_authenticated: boolean;
   is_loading: boolean;
   is_loaded: boolean;
-  profile: IProfile | null;
+  profile: ProfileModel | null;
   role: string;
   permissions: string[];
   error: string | null;
   login: (data: { username: string; password: string }, onSuccess?: () => void) => Promise<void>;
   loadProfile: (token?: string, onSuccess?: (result: any) => void) => Promise<void>;
   logout: () => Promise<void>;
+  loading: (status: boolean) => void;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -29,7 +22,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   is_loading: false,
   is_loaded: false,
   profile: null,
-  role: '',
+  role: "",
   permissions: [],
   error: null,
 
@@ -37,25 +30,21 @@ export const useAuthStore = create<AuthStore>((set) => ({
     try {
       set({ is_loading: true, error: null });
 
-      const {
-        data: { token },
-      } = await login(username, password);
+      const token = await login(username, password);
 
       // set localstorage
       localStorage.setItem(KEY_SESSION, token);
 
       // load user
-      const {
-        data: { profile, permissions, role },
-      } = await loadProfile(token);
+      const profile = await getProfile(token);
 
       set({
         is_loading: false,
         is_loaded: true,
         profile: profile,
-        permissions: permissions,
-        role: role,
-        is_authenticated: true,
+        // permissions: permissions,
+        // role: role,
+        is_authenticated: true
       });
 
       if (onSuccess) {
@@ -72,7 +61,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     } catch (error: any) {
       set({
         is_loading: false,
-        error: error?.response?.data?.error_message || 'เกิดข้อผิดพลาดไม่สามารถเข้าสู่ระบบได้',
+        error: error?.response?.data?.error_message || "เกิดข้อผิดพลาดไม่สามารถเข้าสู่ระบบได้"
       });
     }
   },
@@ -81,17 +70,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({ is_loading: true });
 
       // load user
-      const { data } = await loadProfile(token);
-      const { profile } = data;
+      const profile = await getProfile(token);
 
       set({ is_loading: false, is_loaded: true, profile: profile, is_authenticated: true });
 
-      onSuccess && onSuccess(data);
+      onSuccess && onSuccess(profile);
     } catch (error) {
       set({ is_loading: false, is_loaded: true });
       //
       localStorage.removeItem(KEY_SESSION);
-      window.location.replace('/auth/login');
+      window.location.replace("/auth/login");
     }
   },
   logout: async () => {
@@ -105,14 +93,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
         is_loading: false,
         is_loaded: false,
         profile: null,
-        role: '',
-        permissions: [],
+        role: "",
+        permissions: []
       });
     } catch (error) {
       console.log(error);
     } finally {
       // redirect
-      window.location.replace('/auth/login');
+      window.location.replace("/auth/login");
     }
   },
+  loading: (status: boolean) => set({ is_loading: status })
 }));

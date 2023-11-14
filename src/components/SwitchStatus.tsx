@@ -1,46 +1,13 @@
 import styled from "@emotion/styled";
 import { Box, Stack, Switch, SwitchProps, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
 import PagePaper from "./PagePaper";
 
 type SwitchStatusProps = {
-  editMode?: boolean;
-};
-
-type SwitchStatusType = {
-  is_active: boolean;
-};
-
-type SwitchStatusBaseProps = {
+  disabled?: boolean;
   title?: string;
-} & SwitchProps;
+};
 
-function SwitchStatus({ editMode = false }: SwitchStatusProps) {
-  const { control, watch, setValue } = useFormContext<SwitchStatusType>(); // retrieve all hook methods
-
-  const isChecked = watch("is_active");
-
-  return (
-    <PagePaper>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
-        <Typography variant="title_S">เปิดใช้งาน</Typography>
-        <Box>
-          <IOSSwitch
-            id="is_active"
-            checked={isChecked}
-            onChange={(e) => {
-              setValue("is_active", e.currentTarget.checked);
-            }}
-            inputProps={{ "aria-label": "controlled" }}
-            disabled={!editMode}
-          />
-        </Box>
-      </Stack>
-    </PagePaper>
-  );
-}
-
-export function SwitchStatusBase({ title = "เปิดใช้งาน", ...props }: SwitchStatusBaseProps) {
+export function SwitchStatus({ title = "เปิดใช้งาน", ...props }: SwitchStatusProps) {
   return (
     <PagePaper>
       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
