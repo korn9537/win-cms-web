@@ -22,9 +22,11 @@ export type MyMenu = {
 };
 
 export type MySubMenu = {
+  icon?: React.ReactNode;
   title: string;
   href: string;
   key?: string;
+  subMenus?: MySubMenu[];
 };
 
 export type AppMenuProps = {

@@ -53,12 +53,14 @@ export default function PageLayout(props: PageLayoutProps) {
     toggleCleanLayout: state.toggleCleanLayout,
     isCleanLayout: state.isCleanLayout,
     menuSize: state.menuSize,
-    toggleMenuSize: state.toggleMenuSize
+    toggleMenuSize: state.toggleMenuSize,
+    setMenus: state.setMenus
   }));
 
   const layoutStore = useLayoutStore((state) => ({
     menuSize: state.menuSize,
-    toggleMenuSize: state.toggleMenuSize
+    toggleMenuSize: state.toggleMenuSize,
+    setMenus: state.setMenus
   }));
 
   const currentAppMenuSize = useRef(layoutStore.menuSize);
@@ -91,6 +93,16 @@ export default function PageLayout(props: PageLayoutProps) {
 
   // layout
   useEffect(() => {
+    if (props.appMenus) {
+      layoutStore.setMenus(props.appMenus);
+    }
+
+    if (props.moduleMenus) {
+      console.log("set module menus", props.moduleMenus, props.moduleMenuSize);
+
+      moduleStore.setMenus(props.moduleMenus);
+    }
+
     if (props.clean) {
       moduleStore.toggleCleanLayout(props.clean);
     }

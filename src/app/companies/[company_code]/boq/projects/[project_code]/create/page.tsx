@@ -1,21 +1,25 @@
 "use client";
 
+import ButtonMenu from "@/components/ButtonMenu";
 import { IconFile, IconImport, IconUpload } from "@/components/Icons";
 import PageLayout from "@/components/PageLayout";
+import ComfirmDialog from "@/components/dialogs/ComfirmDialog";
 import FormWizardAction from "@/components/forms/FormWizardAction";
 import FormWizardBar from "@/components/forms/FormWizardBar";
 import { useDialog } from "@/hooks/useDialog";
 import { useWizard } from "@/hooks/useWizard";
+import { getProjectForLayoutData } from "@/services/graphql/project.service";
 import { ChevronRight } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import FormEstimateCost from "../../../components/forms/FormEstimateCost";
 import FormInfo from "../../../components/forms/FormInfo";
 import FormMaterial from "../../../components/forms/FormMaterial";
 import FormSummary from "../../../components/forms/FormSummary";
 import FormWorkOrder from "../../../components/forms/FormWorkOrder";
-import ComfirmDialog from "@/components/dialogs/ComfirmDialog";
-import ButtonMenu from "@/components/ButtonMenu";
+import { useBoqCreateStore } from "../../../stores/boq-create.store";
 
 type ProjectBoqCreatePageProps = {
   params: {
@@ -27,6 +31,26 @@ type ProjectBoqCreatePageProps = {
 export default function ProjectBoqCreatePage(props: ProjectBoqCreatePageProps) {
   // statics
   const router = useRouter();
+  const { company_code, project_code } = props.params;
+
+  const boqState = useBoqCreateStore((state) => ({
+    getMasterData: state.getMasterData,
+    loading: state.loading
+  }));
+
+  // query
+  const { data: project, isFetched: isFetchedProject } = useQuery({
+    queryKey: ["project", project_code],
+    queryFn: () => {
+      return getProjectForLayoutData(project_code);
+    }
+  });
+
+  useEffect(() => {
+    if (isFetchedProject) {
+      boqState.getMasterData(project?.model_types || [], project?.model_sizes || []);
+    }
+  }, [isFetchedProject]);
 
   // hooks
   const wizard = useWizard({
@@ -36,7 +60,8 @@ export default function ProjectBoqCreatePage(props: ProjectBoqCreatePageProps) {
       "วัสดุที่บริษัทจัดซื้อ",
       "วัสดุและค่าแรงงานตัดจ่าย",
       "สรุปต้นทุน"
-    ]
+    ],
+    defaultStep: 1
   });
 
   //
@@ -44,7 +69,7 @@ export default function ProjectBoqCreatePage(props: ProjectBoqCreatePageProps) {
 
   // actions
   const handleOnBack = () => {
-    router.push(`/company/${props.params.company_code}/boq/projects/${props.params.project_code}`);
+    router.push(`/companies/${props.params.company_code}/boq/projects/${props.params.project_code}`);
   };
 
   const handleOnWizardNext = () => {
@@ -70,20 +95,28 @@ export default function ProjectBoqCreatePage(props: ProjectBoqCreatePageProps) {
     handleOnBack();
   };
 
+  if (isFetchedProject === false || boqState.loading) {
+    return null;
+  }
+
+  const titleProject = project ? `${project?.code} | ${project?.name_th}` : "loading...";
+
   return (
     <>
       <PageLayout
         type="detail"
+        appMenuSize="small"
         toolbar={{
           title: (
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="title_M" color="neutralGray.60">
-                WIN | วิน บางกอก1
+                {titleProject}
               </Typography>
               <ChevronRight />
               <Typography variant="body_M_B">สร้าง BOQ</Typography>
             </Stack>
           ),
+          documentTitle: "สร้าง BOQ",
           actions: (
             <Stack direction="row" spacing={2.5}>
               {wizard.current === 0 && (

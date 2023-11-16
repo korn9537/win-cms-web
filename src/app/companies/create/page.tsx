@@ -4,7 +4,7 @@ import PageLayout from "@/components/PageLayout";
 import SwitchStatus from "@/components/SwitchStatus";
 import FormContainer from "@/components/forms/FormContainer";
 import { SPACING_LAYOUT } from "@/constants/layout.constant";
-import { createCompany } from "@/services/graphql/companies.service";
+import { createCompany } from "@/services/graphql/company.service";
 import { CreateCompanyDTO } from "@/services/graphql/dto/create-company.input";
 import { useLayoutStore } from "@/stores/layout.store";
 import { Stack } from "@mui/material";

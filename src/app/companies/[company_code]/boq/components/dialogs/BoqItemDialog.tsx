@@ -23,44 +23,61 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
+import { BoqItem, BoqItemGroup, useBoqCreateStore } from "../../stores/boq-create.store";
+import numeral from "numeral";
+import _ from "lodash";
 
-type BoqItemDialogProps = {
-  // children?: React.ReactNode;
-  // action?: React.ReactNode;
-} & UseDialogProps;
+type BoqItemDialogProps = {} & UseDialogProps;
 
 type CreateBoqFormValues = {
   type: string;
-
+  //
+  name: string;
+  //
+  item_id: string;
   item_code: string;
   item_name: string;
-
-  name: string;
-
+  //
   cost_code: string;
-
+  //
   quantity: number;
-
+  //
   unit_id: string;
   unit_text: string;
-
+  //
   unit_rate_by_owner: boolean;
   unit_rate: number;
   unit_rate_total: number;
-
+  //
   work_rate_by_owner: boolean;
   work_rate: number;
   work_rate_total: number;
-
+  //
   total: number;
+};
+
+export type BoqItemDialogData = {
+  levelType: "child" | "same";
+  parentId: string | null;
+  itemType?: "group" | "material";
 };
 
 export default function BoqItemDialog(props: BoqItemDialogProps) {
   // statics
   const { open, onCancel, onConfirm, title, content, data, ...dialog } = props;
   const dialogId = React.useId();
+
+  //
+  const { masterItems, masterItemUnits, masterCostCodes, addItem, updateItem } = useBoqCreateStore((state) => ({
+    masterItems: state.masterItems,
+    masterItemUnits: state.masterItemUnits,
+    masterCostCodes: state.masterCostCodes,
+    addItem: state.addItem,
+    updateItem: state.updateItem
+  }));
+
   // -- data
-  const { level, parent_id, type: item_type, parent_index } = data || {};
+  const { levelType, parentId, itemType }: BoqItemDialogData = data || {};
 
   // refs
   const submitBtnRef = React.useRef<HTMLButtonElement>(null);
@@ -72,48 +89,61 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
     setValue,
     formState: { errors },
     watch,
-    trigger,
     handleSubmit
   } = useForm<CreateBoqFormValues>({
     defaultValues: {
       type: "",
+      //
+      name: "",
+      //
+      item_id: "",
       item_code: "",
       item_name: "",
-      name: "",
+      //
       cost_code: "",
+      //
       quantity: 0,
       unit_id: "",
       unit_text: "",
+      //
       unit_rate_by_owner: false,
       unit_rate: 0,
       unit_rate_total: 0,
+      //
       work_rate_by_owner: false,
       work_rate: 0,
       work_rate_total: 0,
+      //
       total: 0
     }
   });
 
   React.useEffect(() => {
     if (open) {
-      if (item_type === "group") {
+      if (parentId == null) {
         setValue("type", "group");
       } else {
-        setValue("type", "item");
+        setValue("type", itemType || "group");
       }
     }
-
     return () => {};
   }, [open]);
 
   // watches
   const selectedType = watch("type", "group");
+  //
   const enableUnitRateOwner = watch("unit_rate_by_owner", false);
   const enableWorkRateOwner = watch("work_rate_by_owner", false);
+  //
+  const quantity = watch("quantity", 0);
+  //
+  const unit_rate = watch("unit_rate", 0);
+  const work_rate = watch("work_rate", 0);
+  //
   const totalUnitRate = watch("unit_rate_total", 0);
   const totalWorkRate = watch("work_rate_total", 0);
-
-  // console.log(watch());
+  //
+  const sumTotal = numeral(totalUnitRate).add(totalWorkRate).format("0,0.00");
 
   // ระดับ
   const levelText = "1";
@@ -126,9 +156,60 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
   };
 
   const handleOnSubmit = (values: CreateBoqFormValues) => {
-    console.log("values", values);
+    const submitId = _.uniqueId("boq-item-");
 
-    // mutate
+    let item: BoqItem;
+
+    if (values.type == "group") {
+      item = {
+        id: submitId,
+        name: values.name,
+        //
+        parent_id: parentId,
+        //
+        type: "group",
+        //
+        unit_rate_total: 0,
+        work_rate_total: 0,
+        //
+        total: 0
+      };
+    } else {
+      item = {
+        id: submitId,
+        name: values.name,
+        //
+        parent_id: parentId,
+        //
+        type: "material",
+        //
+        item_id: values.item_id,
+        item_code: values.item_code,
+        item_name: values.item_name,
+        //
+        cost_code: values.cost_code,
+        //
+        quantity: values.quantity,
+        //
+        unit_id: values.unit_id,
+        unit_name: values.unit_text,
+        //
+        unit_rate_by_owner: values.unit_rate_by_owner,
+        unit_rate: values.unit_rate,
+        unit_rate_total: values.unit_rate_total,
+        //
+        work_rate_by_owner: values.work_rate_by_owner,
+        work_rate: values.work_rate,
+        work_rate_total: values.work_rate_total,
+        //
+        total: numeral(values.unit_rate_total).add(values.work_rate_total).value() || 0
+      };
+    }
+
+    //
+    addItem(item);
+    //
+    onConfirm(item);
   };
 
   return (
@@ -160,7 +241,11 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                       name="row-radio-buttons-group"
                     >
                       <FormControlLabel value="group" control={<Radio />} label="หมวดงาน / งาน" />
-                      <FormControlLabel value="item" control={<Radio />} label="วัสดุและค่าแรง" />
+                      <FormControlLabel
+                        value="material"
+                        control={<Radio disabled={parentId == null} />}
+                        label="วัสดุและค่าแรง"
+                      />
                     </RadioGroup>
                   </FormControl>
                 )}
@@ -190,44 +275,78 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                 <Grid item xs={6} md={3}>
                   <TextField label="ระดับ" disabled value={levelText} />
                 </Grid>
-                <Grid item xs={6} md={3}>
-                  <TextField
-                    label="รหัสไอเทม"
-                    required
-                    select
-                    {...register("item_code", {
-                      required: "กรุณาระบุ"
-                    })}
-                    error={!!errors.item_code}
-                    helperText={errors.item_code?.message}
-                  >
-                    <MenuItem value="">--กดเพื่อเลือก--</MenuItem>
-                  </TextField>
+                <Grid item xs={6} md={9}>
+                  {/* <Grid item xs={6} md={3}> */}
+                  <Controller
+                    control={control}
+                    name="item_id"
+                    rules={{ required: "กรุณาระบุ" }}
+                    render={({ field }) => (
+                      <TextField
+                        label="รหัสไอเทม"
+                        required
+                        select
+                        value={field.value}
+                        onChange={(e) => {
+                          field.onChange(e);
+
+                          //
+                          const item = masterItems.find((item) => item.id == e.target.value);
+                          //
+                          setValue("item_code", item?.code ?? "");
+                          setValue("item_name", item?.name_th ?? "");
+                        }}
+                        error={!!errors.item_code}
+                        helperText={errors.item_code?.message}
+                      >
+                        <MenuItem value="">--กดเพื่อเลือก--</MenuItem>
+                        {masterItems.map((item) => (
+                          <MenuItem key={item.id} value={item.id}>
+                            {item.code} {item.name_th}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                {/* <Grid item xs={12} md={6}>
                   <Controller
                     control={control}
                     name="item_name"
                     render={({ field }) => <TextField label="ชื่อไอเทม" disabled value={field.value || "ไม่ระบุ"} />}
                   />
-                  {/* <TextField label="ชื่อไอเทม" disabled {...register("item_name")} /> */}
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField label="ข้อมูลไอเทมเพิ่มเติม" placeholder="กรอกข้อมูล" {...register("name")} />
-                </Grid>
+                </Grid> */}
                 <Grid item xs={6}>
                   <TextField
-                    label="รหัสต้นทุน"
-                    required
-                    select
-                    {...register("cost_code", {
-                      required: "กรุณาระบุ"
-                    })}
-                    error={!!errors.cost_code}
-                    helperText={errors.cost_code?.message}
-                  >
-                    <MenuItem value="">--กดเพื่อเลือก--</MenuItem>
-                  </TextField>
+                    label="ข้อมูลไอเทมเพิ่มเติม"
+                    placeholder="กรอกข้อมูล"
+                    {...register("name", { required: false })}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <Controller
+                    control={control}
+                    name="cost_code"
+                    rules={{ required: "กรุณาระบุ" }}
+                    render={({ field }) => (
+                      <TextField
+                        label="รหัสต้นทุน"
+                        required
+                        select
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={!!errors.cost_code}
+                        helperText={errors.cost_code?.message}
+                      >
+                        <MenuItem value="">--กดเพื่อเลือก--</MenuItem>
+                        {masterCostCodes.map((item) => (
+                          <MenuItem key={item.code} value={item.code}>
+                            {item.code} {item.name_th}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6} md={3}>
                   <TextField
@@ -249,7 +368,13 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                         }
                       },
                       onChange: (e) => {
-                        setValue("unit_rate_total", e.target.value * watch("unit_rate", 0));
+                        const value = numeral(e.target.value || "0").value();
+
+                        const _unit_rate_total = numeral(value).multiply(unit_rate).value();
+                        const _work_rate_total = numeral(value).multiply(work_rate).value();
+
+                        setValue("unit_rate_total", _unit_rate_total || 0);
+                        setValue("work_rate_total", _work_rate_total || 0);
                       }
                     })}
                     error={!!errors.quantity}
@@ -257,9 +382,29 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
-                  <TextField label="หน่วย" required select {...register("unit_id")}>
-                    <MenuItem value="">--กดเพื่อเลือก--</MenuItem>
-                  </TextField>
+                  <Controller
+                    control={control}
+                    name="unit_id"
+                    rules={{ required: "กรุณาระบุ" }}
+                    render={({ field }) => (
+                      <TextField
+                        label="หน่วย"
+                        required
+                        select
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={!!errors.unit_id}
+                        helperText={errors.unit_id?.message}
+                      >
+                        <MenuItem value="">--กดเพื่อเลือก--</MenuItem>
+                        {masterItemUnits.map((item) => (
+                          <MenuItem key={item.id} value={item.id}>
+                            {item.name_th}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={12} md={6}></Grid>
                 <Grid item xs={6} md={3}>
@@ -272,15 +417,16 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                         positive: (value) => {
                           return value > 0 || "กรุณาระบุจำนวนที่มากกว่า 0";
                         },
-                        integer: (value) => {
-                          return Number.isInteger(+value) || "กรุณาระบุจำนวนเป็นจำนวนเต็ม";
-                        },
                         max: (value) => {
-                          return value <= 9999 || "กรุณาระบุจำนวนไม่เกิน 9,999";
+                          return value <= 99999 || "กรุณาระบุจำนวนไม่เกิน 99,999";
                         }
                       },
                       onChange: (e) => {
-                        setValue("unit_rate_total", e.target.value * watch("quantity", 0));
+                        const value = numeral(e.target.value || "0")
+                          .multiply(quantity)
+                          .value();
+
+                        setValue("unit_rate_total", value || 0);
                       }
                     }}
                     render={({ field }) => (
@@ -332,7 +478,11 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                           }
                         },
                         onChange: (e) => {
-                          setValue("unit_rate_total", e.target.value * watch("quantity", 0));
+                          const value = numeral(e.target.value || "0")
+                            .multiply(quantity)
+                            .value();
+
+                          setValue("unit_rate_total", value || 0);
                         }
                       }}
                       render={({ field }) => (
@@ -350,7 +500,7 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="รวมราคาวัสดุ (บาท)" disabled {...register("unit_rate_total")} />
+                  <TextField label="รวมราคาวัสดุ (บาท)" disabled value={numeral(totalUnitRate).format("0,0.00")} />
                 </Grid>
                 <Grid item xs={6} md={3}>
                   <Controller
@@ -370,7 +520,11 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                         }
                       },
                       onChange: (e) => {
-                        setValue("work_rate_total", e.target.value * watch("quantity", 0));
+                        const value = numeral(e.target.value || "0")
+                          .multiply(quantity)
+                          .value();
+
+                        setValue("work_rate_total", value || 0);
                       }
                     }}
                     render={({ field }) => (
@@ -422,7 +576,11 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                           }
                         },
                         onChange: (e) => {
-                          setValue("work_rate_total", e.target.value * watch("quantity", 0));
+                          const value = numeral(e.target.value || "0")
+                            .multiply(quantity)
+                            .value();
+
+                          setValue("work_rate_total", value || 0);
                         }
                       }}
                       render={({ field }) => (
@@ -440,13 +598,13 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="รวมค่าแรง (บาท)" disabled {...register("work_rate_total")} />
+                  <TextField label="รวมค่าแรง (บาท)" disabled value={numeral(totalWorkRate).format("0,0.00")} />
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="title_S">รวมราคาวัสดุและค่าแรง</Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField label="รวมทั้งสิ้น (บาท)" disabled value={totalUnitRate + totalWorkRate} />
+                  <TextField label="รวมทั้งสิ้น (บาท)" disabled value={sumTotal} />
                 </Grid>
               </>
             )}

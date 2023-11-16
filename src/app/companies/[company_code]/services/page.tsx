@@ -27,7 +27,7 @@ export default function ServiceSelectPage(props: ServiceSelectPageProps) {
   };
 
   return (
-    <PageLayout type="detail">
+    <PageLayout type="detail" appMenuSize="hidden">
       <Container>
         <PageToolbar title={company.name_th} backFunction={() => router.push("/companies")} />
         <Grid container spacing={SPACING_LAYOUT}>

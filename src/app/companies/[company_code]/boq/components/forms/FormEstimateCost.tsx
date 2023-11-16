@@ -1,25 +1,13 @@
-import ButtonAdd from "@/components/ButtonAdd";
 import EmptyDataPanel from "@/components/EmptyDataPanel";
-import { IconDelete, IconEdit } from "@/components/Icons";
+import { IconAdd } from "@/components/Icons";
 import FormContainer, { FormContainerProps } from "@/components/forms/FormContainer";
-import { SPACING_FORM } from "@/constants/layout.constant";
+import themeConfig from "@/configs/theme.config";
 import { useDialog } from "@/hooks/useDialog";
-import {
-  Box,
-  Chip,
-  IconButton,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography
-} from "@mui/material";
-import { useBoqCreateStore } from "../../stores/boq-create.store";
-import { CollapseCard } from "../CollapseCard";
-import { CollapseGroup } from "../CollapseGroup";
+import { Box, IconButton } from "@mui/material";
+import numeral from "numeral";
+import { BoqItemGroup, BoqItemMaterial, useBoqCreateStore } from "../../stores/boq-create.store";
 import BoqItemDialog from "../dialogs/BoqItemDialog";
+// import { getCostCodes } from "@/services/graphql/masters/costcode.service";
 
 export const defaultFormEstimateCostValues: FormEstimateCostValues = {};
 
@@ -35,24 +23,33 @@ export default function FormEstimateCost({
   ...props
 }: FormEstimateCostProps) {
   // statics
-  const store = useBoqCreateStore((state) => state);
+  const { rootKeys, itemByKey } = useBoqCreateStore((state) => ({
+    rootKeys: state.rootKeys,
+    itemByKey: state.itemByKey
+  }));
 
   const dialogAdd = useDialog({
     onConfirm(data, dialog, res) {
-      console.log(data);
+      // console.log(data);
+      dialog.close();
     },
     onCancel(data, dialog) {}
   });
 
-  console.log(store);
+  // console.log(rootKeys, itemByKey);
 
   // actions
-  const handleClickAdd = (level: number = 0, parent_id: string | null, parent_index: number, type: string) => {
+  const handleClickAdd = (
+    levelType: "child" | "same" | string,
+    parentId: string | null,
+    itemType?: "group" | "material"
+  ) => {
+    console.log("handleClickAdd", levelType, parentId, itemType);
+
     dialogAdd.open(null, null, {
-      level,
-      parent_id,
-      parent_index,
-      type
+      levelType,
+      parentId,
+      itemType
     });
   };
 
@@ -60,172 +57,40 @@ export default function FormEstimateCost({
 
   let content = null;
 
-  if (store.items.length == 0) {
-    content = <EmptyDataPanel onClick={() => handleClickAdd(0, null, 0, "group")} />;
+  if (rootKeys.length == 0) {
+    content = <EmptyDataPanel onClick={() => handleClickAdd("child", null)} />;
   } else {
     content = (
-      <CollapseGroup spacing={SPACING_FORM}>
-        <CollapseCard
-          title="1 หมวดงานโครงสร้าง"
+      <Box
+        className="boq-table"
+        sx={{
+          ...themeConfig.typography.body_M
+        }}
+      >
+        {/* Header Sticky */}
+        <Box
+          className="boq-row boq-header"
           sx={{
-            "& .card-action": {
-              display: "none"
-            },
-            "&:hover": {
-              ".card-action": {
-                display: "inherit"
-              },
-              ".card-action-hidden": {
-                display: "none"
-              }
-            }
-          }}
-          action={
-            <Stack direction="row" alignItems="center" spacing={2.5}>
-              <Box className="card-action">
-                <Stack direction="row" alignItems="center" spacing={2.5}>
-                  <ButtonAdd text="ระดับเดียวกัน" variant="outlined" size="small" />
-                  <ButtonAdd text="ระดับย่อย" variant="outlined" size="small" />
-                  <IconButton size="small" color="black80">
-                    <IconEdit />
-                  </IconButton>
-                  <IconButton size="small" color="black80">
-                    <IconDelete />
-                  </IconButton>
-                </Stack>
-              </Box>
-              <Typography variant="body_M_B" className="card-action-hidden">
-                57,500.75
-              </Typography>
-            </Stack>
-          }
-          open
-          titleProps={{
-            sx: {
-              bgcolor: "#F5F6F8",
-              borderBottom: "1px solid",
-              borderColor: "neutralGray.20"
-            }
-          }}
-          bodyProps={{
-            sx: {
-              bgcolor: "neutralGray.10"
-            }
+            bgcolor: (theme) => theme.palette.neutralGray[40]
           }}
         >
-          <CollapseGroup>
-            <CollapseCard
-              title="1.1 งานโครงสร้างคอนกรีตเสริมเหล็ก"
-              action={<Typography variant="body_M_B">57,500.75</Typography>}
-              titleProps={{
-                sx: {
-                  bgcolor: "neutralGray.20",
-                  borderBottom: "1px solid",
-                  borderColor: "neutralGray.10"
-                }
-              }}
-              bodyProps={{
-                sx: {
-                  bgcolor: "#fff"
-                }
-              }}
-              open
-              disabledPadding
-            >
-              <TableExample />
-              <CollapseGroup spacing={SPACING_FORM} p={2}>
-                <CollapseCard
-                  title="1.1.1 งานโครงสร้างคอนกรีตเสริมเหล็ก"
-                  action={<Typography variant="body_M_B">57,500.75</Typography>}
-                  titleProps={{
-                    sx: {
-                      bgcolor: "neutralGray.20",
-                      borderBottom: "1px solid",
-                      borderColor: "neutralGray.10"
-                    }
-                  }}
-                  bodyProps={{
-                    sx: {
-                      bgcolor: "#fff"
-                    }
-                  }}
-                  open
-                  bordered
-                  disabledPadding
-                >
-                  <TableExample />
-                  <CollapseGroup spacing={SPACING_FORM} p={2}>
-                    <CollapseCard
-                      title="1.1.1.1 งานโครงสร้างคอนกรีตเสริมเหล็ก"
-                      action={<Typography variant="body_M_B">57,500.75</Typography>}
-                      titleProps={{
-                        sx: {
-                          bgcolor: "neutralGray.20",
-                          borderBottom: "1px solid",
-                          borderColor: "neutralGray.10"
-                        }
-                      }}
-                      bodyProps={{
-                        sx: {
-                          bgcolor: "#fff"
-                        }
-                      }}
-                      open
-                      bordered
-                      disabledPadding
-                    >
-                      <TableExample />
-                    </CollapseCard>
-                  </CollapseGroup>
-                </CollapseCard>
-              </CollapseGroup>
-            </CollapseCard>
-            <CollapseCard
-              title="1.2 งานโครงสร้างคอนกรีตเสริมเหล็ก"
-              action={<Typography variant="body_M_B">57,500.75</Typography>}
-              titleProps={{
-                sx: {
-                  bgcolor: "neutralGray.20",
-                  borderBottom: "1px solid",
-                  borderColor: "neutralGray.10"
-                }
-              }}
-              bodyProps={{
-                sx: {
-                  bgcolor: "#fff"
-                }
-              }}
-              open
-              disabledPadding
-            >
-              <TableExample />
-              <CollapseGroup spacing={SPACING_FORM} p={2}>
-                <CollapseCard
-                  title="1.2.1 งานโครงสร้างคอนกรีตเสริมเหล็ก"
-                  action={<Typography variant="body_M_B">57,500.75</Typography>}
-                  titleProps={{
-                    sx: {
-                      bgcolor: "neutralGray.20",
-                      borderBottom: "1px solid",
-                      borderColor: "neutralGray.10"
-                    }
-                  }}
-                  bodyProps={{
-                    sx: {
-                      bgcolor: "#fff"
-                    }
-                  }}
-                  open
-                  bordered
-                  disabledPadding
-                >
-                  <TableExample />
-                </CollapseCard>
-              </CollapseGroup>
-            </CollapseCard>
-          </CollapseGroup>
-        </CollapseCard>
-      </CollapseGroup>
+          <Box>ชื่อหัวข้อ</Box>
+          <Box>จำนวน</Box>
+          <Box>หน่วย</Box>
+          <Box>ราคาวัสดุ/หน่วย (บาท)</Box>
+          <Box>รวมราคาวัสดุ (บาท)</Box>
+          <Box>ค่าแรง/หน่วย (บาท)</Box>
+          <Box>รวมค่าแรง (บาท)</Box>
+          <Box>รวมทั้งสิ้น (บาท)</Box>
+          <Box></Box>
+        </Box>
+        {/*  */}
+        {rootKeys.map((rootId: string) => {
+          return (
+            <BoqGroup key={rootId} itemId={rootId} onClick={(addType, parentId) => handleClickAdd(addType, parentId)} />
+          );
+        })}
+      </Box>
     );
   }
 
@@ -234,50 +99,135 @@ export default function FormEstimateCost({
       <FormContainer title={title} {...props}>
         {content}
       </FormContainer>
+      {/* Dialogs */}
       <BoqItemDialog {...dialogAdd.dialogProps} title="เพิ่มข้อมูลรายการประมาณค่าวัสดุและแรงงาน" />
     </>
   );
 }
 
-function TableExample() {
+function BoqGroup({
+  itemId,
+  onClick
+}: {
+  itemId: string;
+  onClick?: (addType: string, parentId: string | null) => void;
+}) {
+  const itemByKey = useBoqCreateStore((state) => state.itemByKey);
+  const item = itemByKey[itemId] as BoqItemGroup;
+
   return (
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>ชื่อหัวข้อ</TableCell>
-          <TableCell align="right">จำนวน</TableCell>
-          <TableCell>หน่วย</TableCell>
-          <TableCell align="right">{`ราคาวัสดุ/หน่วย (บาท)`}</TableCell>
-          <TableCell align="right">รวมราคาวัสดุ</TableCell>
-          <TableCell align="right">{`ค่าแรง/หน่วย (บาท)`}</TableCell>
-          <TableCell align="right">รวมค่าแรง</TableCell>
-          <TableCell align="right">{`รวมทั้งสิ้น (บาท)`}</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        <TableRow>
-          <TableCell>ตัดหัวเสาเข็ม I-0.22x0.22 m.</TableCell>
-          <TableCell align="right">16.00</TableCell>
-          <TableCell>ต้น</TableCell>
-          <TableCell align="right">
-            <Chip label="40.00" size="small" color="success" />
-          </TableCell>
-          <TableCell align="right">640.00</TableCell>
-          <TableCell align="right">150.00</TableCell>
-          <TableCell align="right">2,400.00</TableCell>
-          <TableCell align="right">3,040.00</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>งานวางผังบ้าน</TableCell>
-          <TableCell align="right">1.00</TableCell>
-          <TableCell>เหมา</TableCell>
-          <TableCell align="right"></TableCell>
-          <TableCell align="right"></TableCell>
-          <TableCell align="right">2,500.00</TableCell>
-          <TableCell align="right">2,500.00</TableCell>
-          <TableCell align="right">2,500.00</TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+    <>
+      <Box
+        className="boq-row boq-group"
+        sx={{
+          bgcolor: (theme) => theme.palette.neutralGray[40]
+        }}
+      >
+        <Box>
+          {item.number} {item.name}
+        </Box>
+        <Box></Box>
+        <Box></Box>
+        <Box></Box>
+        <Box>{numeral(item.unit_rate_total).format("0,0.00")}</Box>
+        <Box></Box>
+        <Box>{numeral(item.work_rate_total).format("0,0.00")}</Box>
+        <Box>{numeral(item.total).format("0,0.00")}</Box>
+        <Box>
+          <IconButton
+            size="small"
+            sx={{
+              svg: {
+                width: 16,
+                height: 16
+              }
+            }}
+            onClick={() => onClick?.("same", item.parent_id)}
+          >
+            <IconAdd />
+          </IconButton>
+
+          <IconButton
+            size="small"
+            sx={{
+              svg: {
+                width: 16,
+                height: 16
+              },
+              ml: 1
+            }}
+            onClick={() => onClick?.("child", item.id)}
+          >
+            <IconAdd />
+          </IconButton>
+        </Box>
+      </Box>
+      {item.material_childs?.map((childId: string) => {
+        return <BoqMaterial key={childId} itemId={childId} onClick={onClick} />;
+      })}
+
+      {item.group_childs?.map((childId: string) => {
+        return <BoqGroup key={childId} itemId={childId} onClick={onClick} />;
+      })}
+
+      {/* {item.childs.map((childId: string) => {
+        const child = itemByKey[childId];
+        if (child.type == "group") {
+          return <BoqGroup key={childId} itemId={childId} onClick={onClick} />;
+        }
+        return <BoqMaterial key={childId} itemId={childId} onClick={onClick} />;
+      })} */}
+    </>
+  );
+}
+
+function BoqMaterial({
+  itemId,
+  onClick
+}: {
+  itemId: string;
+  onClick?: (addType: string, parentId: string | null) => void;
+}) {
+  const item = useBoqCreateStore((state) => state.itemByKey[itemId]) as BoqItemMaterial;
+
+  return (
+    <Box className="boq-row boq-material">
+      <Box>{`${item.item_code} ${item.item_name} ${item.name}`}</Box>
+      <Box>{item.quantity}</Box>
+      <Box>{item.unit_name}</Box>
+      <Box>{numeral(item.unit_rate).format("0,0.00")}</Box>
+      <Box>{numeral(item.unit_rate_total).format("0,0.00")}</Box>
+      <Box>{numeral(item.work_rate).format("0,0.00")}</Box>
+      <Box>{numeral(item.work_rate_total).format("0,0.00")}</Box>
+      <Box>{numeral(item.unit_rate_total).add(item.work_rate_total).format("0,0.00")}</Box>
+      <Box>
+        <IconButton
+          size="small"
+          sx={{
+            svg: {
+              width: 16,
+              height: 16
+            }
+          }}
+          onClick={() => onClick?.("same", item.parent_id)}
+        >
+          <IconAdd />
+        </IconButton>
+
+        <IconButton
+          size="small"
+          sx={{
+            svg: {
+              width: 16,
+              height: 16
+            },
+            ml: 1
+          }}
+          onClick={() => onClick?.("child", item.id)}
+        >
+          <IconAdd />
+        </IconButton>
+      </Box>
+    </Box>
   );
 }

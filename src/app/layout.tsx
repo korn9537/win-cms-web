@@ -12,7 +12,7 @@ import "@fontsource/noto-sans-thai/400.css";
 import "@fontsource/noto-sans-thai/500.css";
 import "@fontsource/noto-sans-thai/700.css";
 
-import "./globals.css";
+import "./globals.scss";
 
 import "react-perfect-scrollbar/dist/css/styles.css";
 

@@ -4,7 +4,7 @@ import ButtonAdd from "@/components/ButtonAdd";
 import PageLayout from "@/components/PageLayout";
 import PageToolbar from "@/components/PageToolbar";
 import { SPACING_LAYOUT } from "@/constants/layout.constant";
-import { getCompanies } from "@/services/graphql/companies.service";
+import { getCompanies } from "@/services/graphql/company.service";
 import { Box, Container, Grid, Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -41,7 +41,7 @@ export default function CompanySelectPage() {
   };
 
   return (
-    <PageLayout type="detail">
+    <PageLayout type="detail" appMenuSize="hidden">
       <Container>
         <Stack spacing={SPACING_LAYOUT}>
           <PageToolbar

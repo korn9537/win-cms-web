@@ -1,0 +1,84 @@
+body,
+html {
+  min-height: 100vh;
+  color: #333;
+}
+
+.MuiTableCell-head {
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 22px; /* 157.143% */
+}
+
+.MuiTableContainer-root.MuiPaper-root:not(.MuiPaper-elevation0) {
+  box-shadow: 0px 1px 8px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/*  */
+.boq-table {
+  .boq-row {
+    display: flex;
+    // gap: 8px;
+    gap: 16px;
+    padding: 24px 16px;
+
+    > div {
+      // padding: 4px 0;
+
+      &:nth-child(1) {
+        flex: 1;
+      }
+      &:nth-child(2) {
+        width: 80px;
+        text-align: right;
+      }
+      &:nth-child(3) {
+        width: 80px;
+      }
+      &:nth-child(4) {
+        width: 145px;
+        text-align: right;
+      }
+      &:nth-child(5) {
+        width: 130px;
+        text-align: right;
+      }
+      &:nth-child(6) {
+        width: 130px;
+        text-align: right;
+      }
+      &:nth-child(7) {
+        width: 130px;
+        text-align: right;
+      }
+      &:nth-child(8) {
+        width: 130px;
+        text-align: right;
+      }
+      &:nth-child(9) {
+        text-align: right;
+        width: 60px;
+      }
+    }
+  }
+
+  .boq-header {
+    padding: 12px 16px;
+    font-weight: 700;
+  }
+
+  .boq-group {
+    font-weight: 700;
+  }
+
+  .boq-material {
+    font-weight: 400;
+  }
+}

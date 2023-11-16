@@ -7,12 +7,38 @@ import _ from "lodash";
 
 export const MODULE_MENUS: MyMenu[] = [
   {
-    key: "1",
+    key: "master-data",
     title: "ระบบจัดการข้อมูลกลาง",
     description: "เครื่องมือบริหารจัดการข้อมูลกลาง",
     image: "/images/modules/1.png",
-    href: "/",
-    icon: <IconInformation />
+    href: "/master-data",
+    icon: <IconInformation />,
+    subMenus: [
+      {
+        icon: <IconInformation />,
+        key: "company",
+        title: "ข้อมูลบริษัท",
+        href: "/master-data/company"
+      },
+      {
+        icon: <IconInformation />,
+        key: "project",
+        title: "ข้อมูลโครงการ",
+        href: "/master-data/project",
+        subMenus: [
+          {
+            key: "project-list",
+            title: "ข้อมูลพื้นฐาน",
+            href: "/master-data/project/list"
+          },
+          {
+            key: "project-list",
+            title: "เฟส/เฟสย่อย",
+            href: "/master-data/phase"
+          }
+        ]
+      }
+    ]
   },
   {
     key: "2",

@@ -2,6 +2,7 @@ import axios from "axios";
 import { CreateCompanyDTO } from "./dto/create-company.input";
 import { compactQuery } from "@/helpers/compact-query";
 import { CompanyModel } from "./models/company.model";
+import { DocumentFormatGroupModel } from "./models/document-format.model";
 
 const endpoint = "/graphql";
 
@@ -129,3 +130,30 @@ export const getCompanyAddress = async () => {
 
 //   return data.data.profile;
 // };
+
+export const getRunningDocument = async (groupCode: string): Promise<DocumentFormatGroupModel> => {
+  const query = `
+    query runningFormatGroup($code: String!) {
+      format_groups: runningFormatGroup(code: $code) {
+        id
+        code
+        name_th
+        formats {
+          id
+          running_key
+          run_format
+        }
+      }
+    }`;
+
+  const variables = {
+    code: groupCode
+  };
+
+  const { data } = await axios.post(endpoint, {
+    query: compactQuery(query),
+    variables
+  });
+
+  return data.data.format_groups;
+};

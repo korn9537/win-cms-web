@@ -1,6 +1,6 @@
 "use client";
 
-import { getCompanyForLayoutData } from "@/services/graphql/companies.service";
+import { getCompanyForLayoutData } from "@/services/graphql/company.service";
 import { useLayoutStore } from "@/stores/layout.store";
 import { useModuleLayoutStore } from "@/stores/module-layout.store";
 import { useQuery } from "@tanstack/react-query";

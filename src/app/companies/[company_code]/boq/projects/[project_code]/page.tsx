@@ -4,6 +4,7 @@ import ButtonAdd from "@/components/ButtonAdd";
 import ChipStatus from "@/components/ChipStatus";
 import PageLayout from "@/components/PageLayout";
 import { SPACING_LAYOUT } from "@/constants/layout.constant";
+import { getProjectForLayoutData, getProjects } from "@/services/graphql/project.service";
 import {
   Grid,
   MenuItem,
@@ -16,6 +17,7 @@ import {
   TableRow,
   TextField
 } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 type ProjectBoqPageProps = {
@@ -30,17 +32,25 @@ export default function ProjectBoqPage(props: ProjectBoqPageProps) {
   const router = useRouter();
   const { company_code, project_code } = props.params;
 
+  //
+  const { data: project } = useQuery({
+    queryKey: ["project", project_code],
+    queryFn: () => {
+      return getProjectForLayoutData(project_code);
+    }
+  });
+
   // actions
   const handleClickAdd = () => {
-    router.push(`/company/${company_code}/boq/projects/${project_code}/create`);
+    router.push(`/companies/${company_code}/boq/projects/${project_code}/create`);
   };
 
   return (
     <PageLayout
       type="list"
       toolbar={{
-        title: "WIN | วิน บางกอก1",
-        backFunction: () => router.push(`/company/${company_code}/boq`),
+        title: project ? `${project?.code} | ${project?.name_th}` : "loading...",
+        backFunction: () => router.push(`/companies/${company_code}/boq`),
         actions: <ButtonAdd onClick={handleClickAdd} />
       }}
       filter={{
