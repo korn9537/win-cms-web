@@ -52,7 +52,8 @@ export const palette = {
   },
   red: {
     main: "#EC4E43",
-    100: "#EC4E43"
+    100: "#EC4E43",
+    10: "#FDEDEC"
   },
   green: {
     main: "#007565",

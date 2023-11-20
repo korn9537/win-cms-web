@@ -52,8 +52,7 @@ export default function FormWizardBar(props: FormWizardBarProps) {
                 sx={{
                   color: theme.palette.deepBlue[40],
                   width: 20,
-                  height: 20,
-                  mt: 0.25
+                  height: 20
                 }}
               />
             </React.Fragment>

@@ -29,6 +29,32 @@ import _ from "lodash";
 
 type BoqItemDialogProps = {} & UseDialogProps;
 
+const defaultBoqFormValues: CreateBoqFormValues = {
+  type: "",
+  //
+  name: "",
+  //
+  item_id: "",
+  item_code: "",
+  item_name: "",
+  //
+  cost_code: "",
+  //
+  quantity: 0,
+  unit_id: "",
+  unit_name: "",
+  //
+  unit_rate_by_owner: false,
+  unit_rate: 0,
+  unit_rate_total: 0,
+  //
+  work_rate_by_owner: false,
+  work_rate: 0,
+  work_rate_total: 0,
+  //
+  total: 0
+};
+
 type CreateBoqFormValues = {
   type: string;
   //
@@ -43,7 +69,7 @@ type CreateBoqFormValues = {
   quantity: number;
   //
   unit_id: string;
-  unit_text: string;
+  unit_name: string;
   //
   unit_rate_by_owner: boolean;
   unit_rate: number;
@@ -57,9 +83,10 @@ type CreateBoqFormValues = {
 };
 
 export type BoqItemDialogData = {
-  levelType: "child" | "same";
+  levelType?: "child" | "same" | string;
   parentId: string | null;
-  itemType?: "group" | "material";
+  itemType?: "group" | "material" | null;
+  editData?: BoqItem | null;
 };
 
 export default function BoqItemDialog(props: BoqItemDialogProps) {
@@ -67,17 +94,17 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
   const { open, onCancel, onConfirm, title, content, data, ...dialog } = props;
   const dialogId = React.useId();
 
+  const { levelType, parentId, itemType, editData }: BoqItemDialogData = data || {};
+
   //
-  const { masterItems, masterItemUnits, masterCostCodes, addItem, updateItem } = useBoqCreateStore((state) => ({
+  const { masterItems, masterItemUnits, masterCostCodes, addItem, updateItem, parent } = useBoqCreateStore((state) => ({
     masterItems: state.masterItems,
     masterItemUnits: state.masterItemUnits,
     masterCostCodes: state.masterCostCodes,
     addItem: state.addItem,
-    updateItem: state.updateItem
+    updateItem: state.updateItem,
+    parent: state.itemByKey[parentId || ""] as BoqItemGroup | null
   }));
-
-  // -- data
-  const { levelType, parentId, itemType }: BoqItemDialogData = data || {};
 
   // refs
   const submitBtnRef = React.useRef<HTMLButtonElement>(null);
@@ -89,42 +116,25 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
     setValue,
     formState: { errors },
     watch,
-    handleSubmit
+    handleSubmit,
+    reset
   } = useForm<CreateBoqFormValues>({
-    defaultValues: {
-      type: "",
-      //
-      name: "",
-      //
-      item_id: "",
-      item_code: "",
-      item_name: "",
-      //
-      cost_code: "",
-      //
-      quantity: 0,
-      unit_id: "",
-      unit_text: "",
-      //
-      unit_rate_by_owner: false,
-      unit_rate: 0,
-      unit_rate_total: 0,
-      //
-      work_rate_by_owner: false,
-      work_rate: 0,
-      work_rate_total: 0,
-      //
-      total: 0
-    }
+    defaultValues: defaultBoqFormValues
   });
 
   React.useEffect(() => {
     if (open) {
-      if (parentId == null) {
-        setValue("type", "group");
-      } else {
-        setValue("type", itemType || "group");
+      if (editData) {
+        reset({
+          ...editData
+        });
+        return;
       }
+
+      reset({
+        ...defaultBoqFormValues,
+        type: parentId == null ? "group" : itemType || "group"
+      });
     }
     return () => {};
   }, [open]);
@@ -146,9 +156,9 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
   const sumTotal = numeral(totalUnitRate).add(totalWorkRate).format("0,0.00");
 
   // ระดับ
-  const levelText = "1";
+  const levelText = parent ? (parent.level || 0) + 1 : "1";
   // รหัส
-  const levelCodeText = "1.1";
+  const levelCodeText = parent ? `${parent.number}.${(parent.group_childs?.length || 0) + 1}` : "1";
 
   // actions
   const handleOnConfirm = async () => {
@@ -156,7 +166,14 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
   };
 
   const handleOnSubmit = (values: CreateBoqFormValues) => {
-    const submitId = _.uniqueId("boq-item-");
+    let submitId = "";
+
+    if (editData) {
+      submitId = editData.id;
+    } else {
+      // submitId = _.uniqueId("boq-item-");
+      submitId = new Date().getTime().toString();
+    }
 
     let item: BoqItem;
 
@@ -179,7 +196,7 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
         id: submitId,
         name: values.name,
         //
-        parent_id: parentId,
+        parent_id: parentId || "",
         //
         type: "material",
         //
@@ -192,14 +209,14 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
         quantity: values.quantity,
         //
         unit_id: values.unit_id,
-        unit_name: values.unit_text,
+        unit_name: values.unit_name,
         //
         unit_rate_by_owner: values.unit_rate_by_owner,
-        unit_rate: values.unit_rate,
+        unit_rate: numeral(values.unit_rate).value() || 0,
         unit_rate_total: values.unit_rate_total,
         //
         work_rate_by_owner: values.work_rate_by_owner,
-        work_rate: values.work_rate,
+        work_rate: numeral(values.work_rate).value() || 0,
         work_rate_total: values.work_rate_total,
         //
         total: numeral(values.unit_rate_total).add(values.work_rate_total).value() || 0
@@ -207,7 +224,15 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
     }
 
     //
-    addItem(item);
+    if (editData) {
+      if (item.type == "group") {
+        updateItem(item.id, { ...editData, name: item.name });
+      } else {
+        updateItem(item.id, { ...editData, ...item });
+      }
+    } else {
+      addItem(item);
+    }
     //
     onConfirm(item);
   };
@@ -232,7 +257,7 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                 control={control}
                 name="type"
                 render={({ field }) => (
-                  <FormControl>
+                  <FormControl disabled={editData != null || parentId == null || itemType != null}>
                     <RadioGroup
                       onChange={(e) => field.onChange(e.target.value)}
                       value={field.value}
@@ -241,11 +266,7 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                       name="row-radio-buttons-group"
                     >
                       <FormControlLabel value="group" control={<Radio />} label="หมวดงาน / งาน" />
-                      <FormControlLabel
-                        value="material"
-                        control={<Radio disabled={parentId == null} />}
-                        label="วัสดุและค่าแรง"
-                      />
+                      <FormControlLabel value="material" control={<Radio />} label="วัสดุและค่าแรง" />
                     </RadioGroup>
                   </FormControl>
                 )}
@@ -360,11 +381,11 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                         positive: (value) => {
                           return value > 0 || "กรุณาระบุจำนวนที่มากกว่า 0";
                         },
-                        integer: (value) => {
-                          return Number.isInteger(value) || "กรุณาระบุจำนวนเป็นจำนวนเต็ม";
-                        },
+                        // integer: (value) => {
+                        //   return Number.isInteger(value) || "กรุณาระบุจำนวนเป็นจำนวนเต็ม";
+                        // },
                         max: (value) => {
-                          return value <= 9999 || "กรุณาระบุจำนวนไม่เกิน 9,999";
+                          return value <= 100000 || "กรุณาระบุจำนวนไม่เกิน 100,000";
                         }
                       },
                       onChange: (e) => {
@@ -385,7 +406,14 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                   <Controller
                     control={control}
                     name="unit_id"
-                    rules={{ required: "กรุณาระบุ" }}
+                    rules={{
+                      required: "กรุณาระบุ",
+                      onChange: (e) => {
+                        const unit_id = e.target.value;
+                        const unit = masterItemUnits.find((item) => item.id == unit_id);
+                        setValue("unit_name", unit?.name_th ?? "");
+                      }
+                    }}
                     render={({ field }) => (
                       <TextField
                         label="หน่วย"
@@ -415,10 +443,10 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                       required: "กรุณาระบุ",
                       validate: {
                         positive: (value) => {
-                          return value > 0 || "กรุณาระบุจำนวนที่มากกว่า 0";
+                          return value >= 0 || "กรุณาระบุจำนวนที่มากกว่าหรือเท่ากับ 0";
                         },
                         max: (value) => {
-                          return value <= 99999 || "กรุณาระบุจำนวนไม่เกิน 99,999";
+                          return value <= 10000000 || "กรุณาระบุจำนวนไม่เกิน 10,000,000";
                         }
                       },
                       onChange: (e) => {
@@ -451,12 +479,16 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                         <Controller
                           control={control}
                           name="unit_rate_by_owner"
+                          rules={{
+                            onChange: (e) => {
+                              const checked = e.target.value;
+                              if (checked == false) {
+                                setValue("work_rate_by_owner", false);
+                              }
+                            }
+                          }}
                           render={({ field }) => (
-                            <IOSSwitch
-                              size="small"
-                              value={field.value}
-                              onChange={(e, checked) => field.onChange(checked)}
-                            />
+                            <IOSSwitch size="small" checked={field.value} onChange={field.onChange} />
                           )}
                         />
                       </Stack>
@@ -468,13 +500,13 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                         required: "กรุณาระบุ",
                         validate: {
                           positive: (value) => {
-                            return value > 0 || "กรุณาระบุจำนวนที่มากกว่า 0";
+                            return value >= 0 || "กรุณาระบุจำนวนที่มากกว่าหรือเท่ากับ 0";
                           },
-                          integer: (value) => {
-                            return Number.isInteger(+value) || "กรุณาระบุจำนวนเป็นจำนวนเต็ม";
-                          },
+                          // integer: (value) => {
+                          //   return Number.isInteger(+value) || "กรุณาระบุจำนวนเป็นจำนวนเต็ม";
+                          // },
                           max: (value) => {
-                            return value <= 9999 || "กรุณาระบุจำนวนไม่เกิน 9,999";
+                            return value <= 10000000 || "กรุณาระบุจำนวนไม่เกิน 10,000,000";
                           }
                         },
                         onChange: (e) => {
@@ -510,13 +542,13 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                       required: "กรุณาระบุ",
                       validate: {
                         positive: (value) => {
-                          return value > 0 || "กรุณาระบุจำนวนที่มากกว่า 0";
+                          return value >= 0 || "กรุณาระบุจำนวนที่มากกว่าหรือเท่ากับ 0";
                         },
-                        integer: (value) => {
-                          return Number.isInteger(+value) || "กรุณาระบุจำนวนเป็นจำนวนเต็ม";
-                        },
+                        // integer: (value) => {
+                        //   return Number.isInteger(+value) || "กรุณาระบุจำนวนเป็นจำนวนเต็ม";
+                        // },
                         max: (value) => {
-                          return value <= 9999 || "กรุณาระบุจำนวนไม่เกิน 9,999";
+                          return value <= 10000000 || "กรุณาระบุจำนวนไม่เกิน 10,000,000";
                         }
                       },
                       onChange: (e) => {
@@ -552,8 +584,9 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                           render={({ field }) => (
                             <IOSSwitch
                               size="small"
-                              value={field.value}
-                              onChange={(e, checked) => field.onChange(checked)}
+                              checked={field.value}
+                              onChange={field.onChange}
+                              disabled={!enableUnitRateOwner}
                             />
                           )}
                         />
@@ -566,13 +599,13 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
                         required: "กรุณาระบุ",
                         validate: {
                           positive: (value) => {
-                            return value > 0 || "กรุณาระบุจำนวนที่มากกว่า 0";
+                            return value >= 0 || "กรุณาระบุจำนวนที่มากกว่าหรือเท่ากับ 0";
                           },
                           // integer: (value) => {
                           //   return Number.isInteger(+value) || "กรุณาระบุจำนวนเป็นจำนวนเต็ม";
                           // },
                           max: (value) => {
-                            return value <= 9999 || "กรุณาระบุจำนวนไม่เกิน 9,999";
+                            return value <= 10000000 || "กรุณาระบุจำนวนไม่เกิน 10,000,000";
                           }
                         },
                         onChange: (e) => {

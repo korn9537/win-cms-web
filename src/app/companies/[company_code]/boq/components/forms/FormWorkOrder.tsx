@@ -1,9 +1,11 @@
-import EmptyDataPanel from "@/components/EmptyDataPanel";
 import FormContainer, { FormContainerProps } from "@/components/forms/FormContainer";
+import themeConfig from "@/configs/theme.config";
 import { SPACING_FORM } from "@/constants/layout.constant";
-import { Typography, Box, Stack, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
-import { CollapseCard } from "../CollapseCard";
-import { CollapseGroup } from "../CollapseGroup";
+import { Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography, useTheme } from "@mui/material";
+import numeral from "numeral";
+import { BoqItemGroup, BoqItemMaterial, useBoqCreateStore } from "../../stores/boq-create.store";
+import { BoxActionType, BoxActions } from "./BoxActions";
+import { useState } from "react";
 
 export const defaultFormWorkOrderValues: FormWorkOrderValues = {};
 
@@ -18,136 +20,203 @@ export default function FormWorkOrder({
   disabled = false,
   ...props
 }: FormWorkOrderProps) {
+  //
+  const { rootKeys, summary } = useBoqCreateStore((state) => {
+    let summary: number = 0;
+    let rootKeys: string[] = [];
+
+    state.rootKeys.forEach((key: string) => {
+      const item = state.itemByKey[key] as BoqItemGroup;
+
+      if ((item.owner_work_total || 0) > 0) {
+        summary =
+          numeral(summary)
+            .add(item.total || 0)
+            .value() || 0;
+
+        rootKeys.push(key);
+      }
+    });
+
+    return {
+      rootKeys: rootKeys || [],
+      itemByKey: state.itemByKey,
+      summary: summary || 0
+    };
+  });
+
   return (
     <FormContainer title={title} {...props}>
-      <CollapseGroup spacing={SPACING_FORM}>
-        <CollapseCard
-          title="1 หมวดงานโครงสร้าง"
-          action={<Typography variant="body_M_B">57,500.75</Typography>}
-          open
-          titleProps={{
-            sx: {
-              bgcolor: "#F5F6F8",
-              borderBottom: "1px solid",
-              borderColor: "neutralGray.20"
-            }
-          }}
-          bodyProps={{
-            sx: {
-              bgcolor: "neutralGray.10"
-            }
+      <Box
+        className="boq-table"
+        sx={{
+          ...themeConfig.typography.body_M,
+          borderRadius: "12px",
+          overflow: "hidden",
+          border: "1px solid",
+          borderColor: (theme) => theme.palette.neutralGray[20]
+        }}
+      >
+        {/* Header Sticky */}
+        <Box
+          className="boq-row boq-header"
+          sx={{
+            bgcolor: (theme) => theme.palette.neutralGray[40],
+            borderBottom: "1px solid",
+            borderColor: (theme) => theme.palette.common.white
           }}
         >
-          <CollapseGroup>
-            <CollapseCard
-              title="1.1 งานโครงสร้างคอนกรีตเสริมเหล็ก"
-              action={<Typography variant="body_M_B">57,500.75</Typography>}
-              titleProps={{
-                sx: {
-                  bgcolor: "neutralGray.20",
-                  borderBottom: "1px solid",
-                  borderColor: "neutralGray.10"
-                }
-              }}
-              bodyProps={{
-                sx: {
-                  bgcolor: "#fff"
-                }
-              }}
-              open
-              disabledPadding
-            >
-              <TableExample />
-            </CollapseCard>
-            <CollapseCard
-              title="1.2 งานโครงสร้างคอนกรีตเสริมเหล็ก"
-              action={<Typography variant="body_M_B">57,500.75</Typography>}
-              titleProps={{
-                sx: {
-                  bgcolor: "neutralGray.20",
-                  borderBottom: "1px solid",
-                  borderColor: "neutralGray.10"
-                }
-              }}
-              bodyProps={{
-                sx: {
-                  bgcolor: "#fff"
-                }
-              }}
-              // open
-              disabledPadding
-            >
-              <TableExample />
-            </CollapseCard>
-            <CollapseCard
-              title="1.3 งานโครงสร้างคอนกรีตเสริมเหล็ก"
-              action={<Typography variant="body_M_B">57,500.75</Typography>}
-              titleProps={{
-                sx: {
-                  bgcolor: "neutralGray.20",
-                  borderBottom: "1px solid",
-                  borderColor: "neutralGray.10"
-                }
-              }}
-              bodyProps={{
-                sx: {
-                  bgcolor: "#fff"
-                }
-              }}
-              // open
-              disabledPadding
-            >
-              <TableExample />
-            </CollapseCard>
-          </CollapseGroup>
-        </CollapseCard>
-      </CollapseGroup>
+          <Box>ชื่อหัวข้อ</Box>
+          <Box>จำนวน</Box>
+          <Box>หน่วย</Box>
+          <Box>ราคาวัสดุ/หน่วย (บาท)</Box>
+          <Box>รวมราคาวัสดุ (บาท)</Box>
+          <Box>ค่าแรง/หน่วย (บาท)</Box>
+          <Box>รวมค่าแรง (บาท)</Box>
+          <Box>รวมทั้งสิ้น (บาท)</Box>
+          <Box></Box>
+        </Box>
+        {/*  */}
+        {rootKeys.map((rootId: string) => {
+          return <BoqGroup key={rootId} itemId={rootId} />;
+        })}
+      </Box>
       <Box mt={SPACING_FORM}>
         <Stack alignItems="center" justifyContent="space-between" direction="row">
           <Typography variant="body_M_B">รวมรายการวัสดุที่บริษัทจัดซื้อทั้งสิ้น</Typography>
-          <Typography variant="body_M_B">2,190.00 บาท</Typography>
+          <Typography variant="body_M_B">{numeral(summary).format("0,0.00")} บาท</Typography>
         </Stack>
       </Box>
     </FormContainer>
   );
 }
-function TableExample() {
+
+function BoqGroup({
+  itemId,
+  onClick,
+  onEdit,
+  open = true
+}: {
+  itemId: string;
+  onClick?: (addType: string, parentId: string | null, itemType?: "group" | "material" | null) => void;
+  onEdit?: (itemId: string) => void;
+  open?: boolean;
+}) {
+  // statics
+  const theme = useTheme();
+
+  // states
+  const [openChild, setOpenChild] = useState(open);
+
+  const { itemByKey, removeItem } = useBoqCreateStore((state) => ({
+    itemByKey: state.itemByKey,
+    removeItem: state.removeItem
+  }));
+  const item = itemByKey[itemId] as BoqItemGroup;
+
+  let bgColor = theme.palette.neutralGray[40];
+
+  switch (item.level) {
+    case 1:
+      bgColor = theme.palette.neutralGray[40];
+      break;
+    case 2:
+      bgColor = theme.palette.neutralGray[20];
+      break;
+    case 2:
+      bgColor = "#F4F4F4";
+      break;
+    default:
+      bgColor = "#F5F6F8";
+      break;
+  }
+
+  const handleOnClickAction = (action: BoxActionType) => {
+    switch (action) {
+      case "collapse":
+        setOpenChild(!openChild);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>ชื่อหัวข้อ</TableCell>
-          <TableCell align="right">จำนวน</TableCell>
-          <TableCell>หน่วย</TableCell>
-          <TableCell align="right">{`ราคาวัสดุ/หน่วย (บาท)`}</TableCell>
-          <TableCell align="right">รวมราคาวัสดุ</TableCell>
-          <TableCell align="right">{`ค่าแรง/หน่วย (บาท)`}</TableCell>
-          <TableCell align="right">รวมค่าแรง</TableCell>
-          <TableCell align="right">{`รวมทั้งสิ้น (บาท)`}</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        <TableRow>
-          <TableCell>ตัดหัวเสาเข็ม I-0.22x0.22 m.</TableCell>
-          <TableCell align="right">16.00</TableCell>
-          <TableCell>ต้น</TableCell>
-          <TableCell align="right">40.00</TableCell>
-          <TableCell align="right">640.00</TableCell>
-          <TableCell align="right">150.00</TableCell>
-          <TableCell align="right">2,400.00</TableCell>
-          <TableCell align="right">3,040.00</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>งานวางผังบ้าน</TableCell>
-          <TableCell align="right">1.00</TableCell>
-          <TableCell>เหมา</TableCell>
-          <TableCell align="right"></TableCell>
-          <TableCell align="right"></TableCell>
-          <TableCell align="right">2,500.00</TableCell>
-          <TableCell align="right">2,500.00</TableCell>
-          <TableCell align="right">2,500.00</TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+    <>
+      <Box
+        className="boq-row boq-group"
+        sx={{
+          bgcolor: bgColor,
+          borderBottom: "1px solid",
+          borderColor: (theme) => theme.palette.common.white
+        }}
+      >
+        <Box>
+          {item.number} {item.name}
+        </Box>
+        <Box></Box>
+        <Box></Box>
+        <Box></Box>
+        <Box>{numeral(item.unit_rate_total).format("0,0.00")}</Box>
+        <Box></Box>
+        <Box>{numeral(item.work_rate_total).format("0,0.00")}</Box>
+        <Box>{numeral(item.total).format("0,0.00")}</Box>
+        <Box>
+          <BoxActions onClick={handleOnClickAction} isOpen={openChild} />
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: openChild ? "block" : "none"
+        }}
+      >
+        {item.material_childs?.map((childId: string) => {
+          return <BoqMaterial key={childId} itemId={childId} onClick={onClick} onEdit={onEdit} />;
+        })}
+
+        {item.group_childs?.map((childId: string) => {
+          return <BoqGroup key={childId} itemId={childId} onClick={onClick} onEdit={onEdit} />;
+        })}
+      </Box>
+    </>
+  );
+}
+
+function BoqMaterial({
+  itemId,
+  onClick,
+  onEdit
+}: {
+  itemId: string;
+  onClick?: (addType: string, parentId: string | null, itemType?: "group" | "material" | null) => void;
+  onEdit?: (itemId: string) => void;
+}) {
+  const { item, removeItem } = useBoqCreateStore((state) => ({
+    item: state.itemByKey[itemId] as BoqItemMaterial,
+    removeItem: state.removeItem
+  }));
+
+  const handleOnClickAction = (action: BoxActionType) => {};
+
+  return (
+    <Box className="boq-row boq-material">
+      <Box>
+        <Typography
+          noWrap
+          sx={{ width: "100%", position: "absolute", inset: 0 }}
+        >{`${item.item_code}: ${item.item_name} ${item.name}`}</Typography>
+      </Box>
+      <Box>{item.quantity}</Box>
+      <Box>{item.unit_name}</Box>
+      <Box>{numeral(item.unit_rate).format("0,0.00")}</Box>
+      <Box>{numeral(item.unit_rate_total).format("0,0.00")}</Box>
+      <Box>{numeral(item.work_rate).format("0,0.00")}</Box>
+      <Box>{numeral(item.work_rate_total).format("0,0.00")}</Box>
+      <Box>{numeral(item.unit_rate_total).add(item.work_rate_total).format("0,0.00")}</Box>
+      <Box>
+        <BoxActions onClick={handleOnClickAction} hideAction hideCollaspe />
+      </Box>
+    </Box>
   );
 }

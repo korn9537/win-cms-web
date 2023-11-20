@@ -31,6 +31,8 @@ a {
 
     > div {
       // padding: 4px 0;
+      min-height: 32px;
+      position: relative;
 
       &:nth-child(1) {
         flex: 1;
@@ -55,16 +57,16 @@ a {
         text-align: right;
       }
       &:nth-child(7) {
-        width: 130px;
+        width: 120px;
         text-align: right;
       }
       &:nth-child(8) {
-        width: 130px;
+        width: 120px;
         text-align: right;
       }
       &:nth-child(9) {
         text-align: right;
-        width: 60px;
+        min-width: 40px;
       }
     }
   }
@@ -81,4 +83,68 @@ a {
   .boq-material {
     font-weight: 400;
   }
+
+  .box-action .actions {
+    display: none;
+  }
+
+  .boq-group.boq-group-hover,
+  .boq-material.boq-material-hover {
+    &:hover {
+      > div:not(:nth-child(1), :nth-child(9)) {
+        display: none;
+      }
+
+      background-color: #f1f7ff;
+
+      .box-action .actions {
+        display: flex;
+      }
+    }
+  }
+}
+
+.boq-table.boq-table-unit-only {
+  .boq-row {
+    > div {
+      &:nth-child(1) {
+        flex: 1;
+      }
+      &:nth-child(2) {
+        width: 80px;
+        text-align: right;
+      }
+      &:nth-child(3) {
+        width: 80px;
+      }
+      &:nth-child(4) {
+        width: 145px;
+        text-align: right;
+      }
+      &:nth-child(5) {
+        width: 120px;
+        text-align: right;
+      }
+      &:nth-child(6) {
+        text-align: right;
+        min-width: 40px;
+        width: auto;
+      }
+    }
+  }
+
+  // .boq-group,
+  // .boq-material {
+  //   &:hover {
+  //     > div:not(:nth-child(1), :nth-child(9)) {
+  //       display: block !important;
+  //     }
+
+  //     background-color: initial;
+
+  //     .box-action .actions {
+  //       display: none;
+  //     }
+  //   }
+  // }
 }

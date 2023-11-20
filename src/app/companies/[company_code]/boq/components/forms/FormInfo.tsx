@@ -1,14 +1,10 @@
-import { IconCloud } from "@/components/Icons";
-import UploadFile from "@/components/UploadFile";
 import UploadPanel from "@/components/UploadPanel";
 import FormContainer, { FormContainerProps } from "@/components/forms/FormContainer";
 import { SPACING_FORM } from "@/constants/layout.constant";
-import { Divider, Grid, MenuItem, TextField, Typography } from "@mui/material";
-import { useContext } from "react";
-import { ProjectInfoModel } from "@/services/graphql/models/project.model";
-import { DocumentFormatGroupModel } from "@/services/graphql/models/document-format.model";
+import { Divider, Grid, MenuItem, TextField } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useBoqCreateStore } from "../../stores/boq-create.store";
+import FormTitle from "@/components/FormTitle";
 
 export const defaultFormInfoValues: FormInfoValues = {
   document_no: "",
@@ -84,6 +80,7 @@ export default function FormInfo({ title = "ข้อมูลทั่วไป
 
   return (
     <FormContainer title={title} {...props} onSubmit={handleSubmit(handleOnSubmit, handleOnError)}>
+      <FormTitle title={title} />
       <Grid container spacing={SPACING_FORM}>
         <Grid item xs={4}>
           <TextField label="รหัสอ้างอิง BOQ Master" disabled />

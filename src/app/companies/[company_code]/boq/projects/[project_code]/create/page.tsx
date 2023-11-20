@@ -61,7 +61,7 @@ export default function ProjectBoqCreatePage(props: ProjectBoqCreatePageProps) {
       "วัสดุและค่าแรงงานตัดจ่าย",
       "สรุปต้นทุน"
     ],
-    defaultStep: 1
+    defaultStep: 0
   });
 
   //
@@ -176,7 +176,14 @@ export default function ProjectBoqCreatePage(props: ProjectBoqCreatePageProps) {
           <FormInfo />
         </Box>
 
-        <Box
+        <Box>
+          {wizard.current === 1 && <FormEstimateCost />}
+          {wizard.current === 2 && <FormMaterial />}
+          {wizard.current === 3 && <FormWorkOrder />}
+          {wizard.current === 4 && <FormSummary />}
+        </Box>
+
+        {/* <Box
           sx={{
             display: wizard.current === 1 ? "block" : "none"
           }}
@@ -206,7 +213,7 @@ export default function ProjectBoqCreatePage(props: ProjectBoqCreatePageProps) {
           }}
         >
           <FormSummary />
-        </Box>
+        </Box> */}
 
         {/*  */}
         <FormWizardAction
