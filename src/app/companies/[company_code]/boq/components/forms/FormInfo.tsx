@@ -1,10 +1,10 @@
 import UploadPanel from "@/components/UploadPanel";
 import FormContainer, { FormContainerProps } from "@/components/forms/FormContainer";
 import { SPACING_FORM } from "@/constants/layout.constant";
-import { Divider, Grid, MenuItem, TextField } from "@mui/material";
+import { BoxProps, Divider, Grid, MenuItem, TextField } from "@mui/material";
+import { forwardRef, useImperativeHandle } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useBoqCreateStore } from "../../stores/boq-create.store";
-import FormTitle from "@/components/FormTitle";
 
 export const defaultFormInfoValues: FormInfoValues = {
   document_no: "",
@@ -43,15 +43,39 @@ export type FormInfoValues = {
 type FormInfoProps = {
   disabled?: boolean;
   onSubmit?: (values: FormInfoValues) => void;
-} & FormContainerProps;
+};
 
-export default function FormInfo({ title = "ข้อมูลทั่วไป", disabled = false, ...props }: FormInfoProps) {
+export type FormInfoFowardRef = {
+  // ... your methods ...
+  submit: () => void;
+  reset: (data: FormInfoValues) => void;
+};
+
+const FormInfo = forwardRef<FormInfoFowardRef, FormInfoProps>(function FormInfo(
+  { disabled = false, onSubmit, ...props }: FormInfoProps,
+  ref
+) {
   // statics
   const { masterDocumentFormats, masterModelTypes, masterModelSizes } = useBoqCreateStore((state) => ({
     masterDocumentFormats: state.masterDocumentFormats,
     masterModelTypes: state.masterModelTypes,
     masterModelSizes: state.masterModelSizes
   }));
+
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        submit: () => {
+          handleSubmit(handleOnSubmit, handleOnError)();
+        },
+        reset: (data: FormInfoValues) => {
+          reset(data);
+        }
+      };
+    },
+    []
+  );
 
   // form
   const {
@@ -60,7 +84,8 @@ export default function FormInfo({ title = "ข้อมูลทั่วไป
     formState: { errors },
     watch,
     handleSubmit,
-    setValue
+    setValue,
+    reset
   } = useForm<FormInfoValues>({
     defaultValues: {
       ...defaultFormInfoValues,
@@ -70,7 +95,7 @@ export default function FormInfo({ title = "ข้อมูลทั่วไป
 
   // actions
   const handleOnSubmit = (values: FormInfoValues) => {
-    console.log(values);
+    onSubmit?.(values);
   };
 
   const handleOnError = () => {};
@@ -79,8 +104,7 @@ export default function FormInfo({ title = "ข้อมูลทั่วไป
   const model_type_id = watch("model_type_id");
 
   return (
-    <FormContainer title={title} {...props} onSubmit={handleSubmit(handleOnSubmit, handleOnError)}>
-      <FormTitle title={title} />
+    <FormContainer title="ข้อมูลทั่วไป">
       <Grid container spacing={SPACING_FORM}>
         <Grid item xs={4}>
           <TextField label="รหัสอ้างอิง BOQ Master" disabled />
@@ -216,4 +240,6 @@ export default function FormInfo({ title = "ข้อมูลทั่วไป
       <UploadPanel />
     </FormContainer>
   );
-}
+});
+
+export default FormInfo;

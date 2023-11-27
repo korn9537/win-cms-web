@@ -20,8 +20,12 @@ export default function FormSummary({ title = "สรุปต้นทุน", 
     let grand_total = 0;
     let average_price = 0;
 
+    console.log("state");
+
     state.itemKeys.forEach((key) => {
       const item = state.itemByKey[key] as BoqItem;
+
+      console.log("item", item);
 
       if (item.type == "material") {
         // owner
@@ -36,6 +40,11 @@ export default function FormSummary({ title = "สรุปต้นทุน", 
             total_owner_unit =
               numeral(total_owner_unit)
                 .add(item.unit_rate_total || 0)
+                .value() || 0;
+
+            total =
+              numeral(total)
+                .add(item.work_rate_total || 0)
                 .value() || 0;
           } else {
             total =

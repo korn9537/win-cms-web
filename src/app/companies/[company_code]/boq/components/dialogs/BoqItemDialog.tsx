@@ -181,7 +181,9 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
       item = {
         id: submitId,
         name: values.name,
+        number: "",
         //
+        parents: [],
         parent_id: parentId,
         //
         type: "group",
@@ -189,8 +191,13 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
         unit_rate_total: 0,
         work_rate_total: 0,
         //
-        total: 0
-      };
+        total: 0,
+        //
+        group_childs: [],
+        material_childs: [],
+        //
+        level: 0
+      } as BoqItemGroup;
     } else {
       item = {
         id: submitId,
@@ -220,7 +227,7 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
         work_rate_total: values.work_rate_total,
         //
         total: numeral(values.unit_rate_total).add(values.work_rate_total).value() || 0
-      };
+      } as BoqItem;
     }
 
     //
@@ -240,6 +247,7 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
   return (
     <Dialog
       open={open}
+      transitionDuration={400}
       onClose={onCancel}
       fullWidth={dialog.DialogProps?.fullWidth || true}
       maxWidth={dialog.DialogProps?.maxWidth || "md"}

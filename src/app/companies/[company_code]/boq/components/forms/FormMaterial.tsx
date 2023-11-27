@@ -141,6 +141,7 @@ function BoqGroup({ itemId, open = true }: { itemId: string; open?: boolean }) {
           borderBottom: "1px solid",
           borderColor: (theme) => theme.palette.common.white
         }}
+        onClick={() => handleOnClickAction("collapse")}
       >
         <Box>
           {item.number} {item.name}

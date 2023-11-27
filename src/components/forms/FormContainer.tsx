@@ -57,24 +57,37 @@ export default function FormContainer({
 export type FormBaseProps = {
   children: React.ReactNode;
   onSubmit: React.FormEventHandler<HTMLFormElement>;
-  showSaveButton?: boolean;
-  buttonState?: "create" | "update";
-  buttonProps?: ButtonProps;
+  onCancel?: React.MouseEventHandler<HTMLButtonElement>;
+  showSubmitButton?: boolean;
+  submitButtonState?: "create" | "update";
+  submitButtonProps?: ButtonProps;
+  showCancelButton?: boolean;
+  cancelButtonProps?: ButtonProps;
+  cancelButtonText?: string;
 };
 
 export function FormBase({
   onSubmit,
   children,
-  showSaveButton = false,
-  buttonState = "create",
+  showSubmitButton = false,
+  submitButtonState = "create",
+  showCancelButton = false,
+  cancelButtonText = "ยกเลิก",
   ...props
 }: FormBaseProps) {
   return (
     <Box component="form" autoComplete="off" noValidate onSubmit={onSubmit}>
       {children}
-      {showSaveButton && (
+      {showSubmitButton && (
         <Box mt={SPACING_LAYOUT}>
-          <ButtonSave state={buttonState} {...props.buttonProps} />
+          <Stack direction="row" spacing={2.5}>
+            {showCancelButton && (
+              <Button onClick={props.onCancel} variant="text" color="black80" {...props.cancelButtonProps}>
+                {cancelButtonText}
+              </Button>
+            )}
+            <ButtonSave state={submitButtonState} {...props.submitButtonProps} />
+          </Stack>
         </Box>
       )}
     </Box>

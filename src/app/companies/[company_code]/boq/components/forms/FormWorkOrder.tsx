@@ -3,7 +3,7 @@ import themeConfig from "@/configs/theme.config";
 import { SPACING_FORM } from "@/constants/layout.constant";
 import { Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography, useTheme } from "@mui/material";
 import numeral from "numeral";
-import { BoqItemGroup, BoqItemMaterial, useBoqCreateStore } from "../../stores/boq-create.store";
+import { BoqItem, BoqItemGroup, BoqItemMaterial, useBoqCreateStore } from "../../stores/boq-create.store";
 import { BoxActionType, BoxActions } from "./BoxActions";
 import { useState } from "react";
 
@@ -29,13 +29,24 @@ export default function FormWorkOrder({
       const item = state.itemByKey[key] as BoqItemGroup;
 
       if ((item.owner_work_total || 0) > 0) {
-        summary =
-          numeral(summary)
-            .add(item.total || 0)
-            .value() || 0;
-
         rootKeys.push(key);
       }
+    });
+
+    // summary
+    rootKeys.forEach((key: string) => {
+      const root = state.itemByKey[key] as BoqItemGroup;
+      root.childs.forEach((itemId: string) => {
+        if (state.itemByKey[itemId].type == "material") {
+          const item = state.itemByKey[itemId] as BoqItemMaterial;
+          if (item.owner_work_total && item.owner_work_total > 0) {
+            summary =
+              numeral(summary)
+                .add(item.total || 0)
+                .value() || 0;
+          }
+        }
+      });
     });
 
     return {
@@ -112,10 +123,40 @@ function BoqGroup({
     itemByKey: state.itemByKey,
     removeItem: state.removeItem
   }));
+
   const item = itemByKey[itemId] as BoqItemGroup;
 
-  let bgColor = theme.palette.neutralGray[40];
+  console.log("item", item);
 
+  // summary
+  let total_unit = 0;
+  let total_work = 0;
+  let total = 0;
+
+  item.childs?.forEach((childId: string) => {
+    const child = itemByKey[childId] as BoqItemMaterial;
+
+    if (child.work_rate_by_owner) {
+      total_unit =
+        numeral(total_unit)
+          .add(child.unit_rate_total || 0)
+          .value() || 0;
+
+      total_work =
+        numeral(total_work)
+          .add(child.work_rate_total || 0)
+          .value() || 0;
+
+      total =
+        numeral(total)
+          .add(child.unit_rate_total || 0)
+          .add(child.work_rate_total || 0)
+          .value() || 0;
+    }
+  });
+
+  // color
+  let bgColor = theme.palette.neutralGray[40];
   switch (item.level) {
     case 1:
       bgColor = theme.palette.neutralGray[40];
@@ -131,6 +172,7 @@ function BoqGroup({
       break;
   }
 
+  // actions
   const handleOnClickAction = (action: BoxActionType) => {
     switch (action) {
       case "collapse":
@@ -150,6 +192,7 @@ function BoqGroup({
           borderBottom: "1px solid",
           borderColor: (theme) => theme.palette.common.white
         }}
+        onClick={() => handleOnClickAction("collapse")}
       >
         <Box>
           {item.number} {item.name}
@@ -157,10 +200,10 @@ function BoqGroup({
         <Box></Box>
         <Box></Box>
         <Box></Box>
-        <Box>{numeral(item.unit_rate_total).format("0,0.00")}</Box>
+        <Box>{numeral(total_unit).format("0,0.00")}</Box>
         <Box></Box>
-        <Box>{numeral(item.work_rate_total).format("0,0.00")}</Box>
-        <Box>{numeral(item.total).format("0,0.00")}</Box>
+        <Box>{numeral(total_work).format("0,0.00")}</Box>
+        <Box>{numeral(total).format("0,0.00")}</Box>
         <Box>
           <BoxActions onClick={handleOnClickAction} isOpen={openChild} />
         </Box>
@@ -192,12 +235,18 @@ function BoqMaterial({
   onClick?: (addType: string, parentId: string | null, itemType?: "group" | "material" | null) => void;
   onEdit?: (itemId: string) => void;
 }) {
+  // statics
   const { item, removeItem } = useBoqCreateStore((state) => ({
     item: state.itemByKey[itemId] as BoqItemMaterial,
     removeItem: state.removeItem
   }));
 
+  // actions
   const handleOnClickAction = (action: BoxActionType) => {};
+
+  if (item.owner_work_total == null || item.owner_work_total == 0) {
+    return null;
+  }
 
   return (
     <Box className="boq-row boq-material">

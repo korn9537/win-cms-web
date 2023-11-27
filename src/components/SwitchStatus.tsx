@@ -1,13 +1,17 @@
 import styled from "@emotion/styled";
 import { Box, Stack, Switch, SwitchProps, Typography } from "@mui/material";
 import PagePaper from "./PagePaper";
+import React from "react";
 
 type SwitchStatusProps = {
   disabled?: boolean;
   title?: string;
-};
+} & SwitchProps;
 
-export function SwitchStatus({ title = "เปิดใช้งาน", ...props }: SwitchStatusProps) {
+const SwitchStatus = React.forwardRef(function SwitchStatus(
+  { title = "เปิดใช้งาน", ...props }: SwitchStatusProps,
+  ref
+) {
   return (
     <PagePaper>
       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
@@ -18,7 +22,7 @@ export function SwitchStatus({ title = "เปิดใช้งาน", ...prop
       </Stack>
     </PagePaper>
   );
-}
+});
 
 export default SwitchStatus;
 

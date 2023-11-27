@@ -42,9 +42,10 @@ export default function AppLayout(props: AppLayoutProps) {
   }));
 
   // aside
-  const { menuSize, menus } = useLayoutStore((state) => ({
+  const { menuSize, menus, setMenus } = useLayoutStore((state) => ({
     menuSize: state.menuSize,
-    menus: state.menus
+    menus: state.menus,
+    setMenus: state.setMenus
   }));
 
   useEffect(() => {
@@ -71,6 +72,12 @@ export default function AppLayout(props: AppLayoutProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (props.menus) {
+      setMenus(props.menus);
+    }
+  }, [props.menus]);
+
   if (props.requireAuth && !auth.is_loaded) {
     return (
       <AppBackdrop
@@ -82,7 +89,9 @@ export default function AppLayout(props: AppLayoutProps) {
   }
 
   // aside
-  const menuList = props.menus || menus || [];
+  // const menuList = props.menus || menus || [];
+
+  const menuList = menus || [];
   const hasMenu = menuSize != "hidden" && menuList.length > 0;
 
   return (

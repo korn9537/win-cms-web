@@ -4,7 +4,8 @@ import ButtonAdd from "@/components/ButtonAdd";
 import ChipStatus from "@/components/ChipStatus";
 import PageLayout from "@/components/PageLayout";
 import { SPACING_LAYOUT } from "@/constants/layout.constant";
-import { getProjectForLayoutData, getProjects } from "@/services/graphql/project.service";
+import { ProjectBoqHeaderModel, getProjectBoqHeaders } from "@/services/graphql/project-boq.service";
+import { getProjectForLayoutData } from "@/services/graphql/project.service";
 import {
   Grid,
   MenuItem,
@@ -18,7 +19,9 @@ import {
   TextField
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import numeral from "numeral";
 
 type ProjectBoqPageProps = {
   params: {
@@ -40,9 +43,20 @@ export default function ProjectBoqPage(props: ProjectBoqPageProps) {
     }
   });
 
+  const query = useQuery({
+    queryKey: ["projects", project_code, "boq"],
+    queryFn: () => {
+      return getProjectBoqHeaders();
+    }
+  });
+
   // actions
   const handleClickAdd = () => {
-    router.push(`/companies/${company_code}/boq/projects/${project_code}/create`);
+    router.push(`/companies/${company_code}/boq/projects/${project_code}/boq/create`);
+  };
+
+  const handleClickView = (code: string) => {
+    router.push(`/companies/${company_code}/boq/projects/${project_code}/boq/${code}`);
   };
 
   return (
@@ -98,19 +112,22 @@ export default function ProjectBoqPage(props: ProjectBoqPageProps) {
             </TableRow>
           </TableHead>
           <TableBody>
-            <TableRow>
-              <TableCell>DH001 - 06</TableCell>
-              <TableCell>บ้านพักอาศัย</TableCell>
-              <TableCell>บ้านเดี่ยว</TableCell>
-              <TableCell>3 ห้องนอน 3 ห้องน้ำ</TableCell>
-              <TableCell>11/02/2023</TableCell>
-              <TableCell>146.11</TableCell>
-              <TableCell>1,115,000,000.00</TableCell>
-              <TableCell>10,000.00</TableCell>
-              <TableCell>
-                <ChipStatus state="active" text="ผ่านการอนุมัติ" />
-              </TableCell>
-            </TableRow>
+            {query.data?.map((row: ProjectBoqHeaderModel) => (
+              <TableRow key={row.id} onClick={() => handleClickView(row.code)}>
+                <TableCell>{row.code}</TableCell>
+                <TableCell>{row.name}</TableCell>
+                <TableCell>{row.model_type.name_th}</TableCell>
+                <TableCell>{row.model.name_th}</TableCell>
+                <TableCell>{dayjs(row.document_date).format("DD/MM/YYYY")}</TableCell>
+                <TableCell>{numeral(row.total_area).format("0,0.00")}</TableCell>
+                <TableCell>{numeral(row.total_cost).format("0,0.00")}</TableCell>
+                <TableCell>{numeral(row.average_price).format("0,0.00")}</TableCell>
+                <TableCell>
+                  <ChipStatus state="active" text={row.state} />
+                  {/* <ChipStatus state="active" text="ผ่านการอนุมัติ" /> */}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>

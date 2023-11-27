@@ -2,12 +2,13 @@ import EmptyDataPanel from "@/components/EmptyDataPanel";
 import FormContainer, { FormContainerProps } from "@/components/forms/FormContainer";
 import themeConfig from "@/configs/theme.config";
 import { useDialog } from "@/hooks/useDialog";
-import { Box, Chip, Typography, useTheme } from "@mui/material";
+import { Box, Chip, Stack, Typography, useTheme } from "@mui/material";
 import numeral from "numeral";
 import { useState } from "react";
 import { BoqItemGroup, BoqItemMaterial, useBoqCreateStore } from "../../stores/boq-create.store";
 import BoqItemDialog from "../dialogs/BoqItemDialog";
 import { BoxActionType, BoxActions } from "./BoxActions";
+import { SPACING_FORM } from "@/constants/layout.constant";
 
 export const defaultFormEstimateCostValues: FormEstimateCostValues = {};
 
@@ -23,13 +24,20 @@ export default function FormEstimateCost({
   ...props
 }: FormEstimateCostProps) {
   // statics
-  const { rootKeys, itemByKey } = useBoqCreateStore((state) => ({
+  const { rootKeys, itemByKey, summary } = useBoqCreateStore((state) => ({
     rootKeys: state.rootKeys,
-    itemByKey: state.itemByKey
+    itemByKey: state.itemByKey,
+    summary: state.rootKeys.reduce((sum: number, key: string) => {
+      const item = state.itemByKey[key] as BoqItemGroup;
+      return (
+        numeral(sum)
+          .add(item.total || 0)
+          .value() || 0
+      );
+    }, 0)
   }));
 
   const info = useBoqCreateStore((state) => state.info);
-  console.log(info);
 
   const dialogAdd = useDialog({
     onConfirm(data, dialog, res) {
@@ -110,6 +118,12 @@ export default function FormEstimateCost({
     <>
       <FormContainer title={title} {...props}>
         {content}
+        <Box mt={SPACING_FORM}>
+          <Stack alignItems="center" justifyContent="space-between" direction="row">
+            <Typography variant="body_M_B">รวมรายการวัสดุที่บริษัทจัดซื้อทั้งสิ้น</Typography>
+            <Typography variant="body_M_B">{numeral(summary).format("0,0.00")} บาท</Typography>
+          </Stack>
+        </Box>
       </FormContainer>
       {/* Dialogs */}
       <BoqItemDialog {...dialogAdd.dialogProps} title="เพิ่มข้อมูลรายการประมาณค่าวัสดุและแรงงาน" />
@@ -188,6 +202,7 @@ function BoqGroup({
           borderBottom: "1px solid",
           borderColor: (theme) => theme.palette.common.white
         }}
+        onClick={() => handleOnClickAction("collapse")}
       >
         <Box>
           {item.number} {item.name}

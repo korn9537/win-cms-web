@@ -56,7 +56,8 @@ export const componentConfig: Components<Omit<Theme, "components">> = {
         displayEmpty: true,
         defaultValue: ""
       },
-      fullWidth: true
+      fullWidth: true,
+      placeholder: "กรอกข้อมูล"
     },
     styleOverrides: {
       root: ({ theme, ownerState }) =>
@@ -171,7 +172,11 @@ export const componentConfig: Components<Omit<Theme, "components">> = {
         ...typography.body_M_B
       },
       contained: {
-        border: "1px solid transparent"
+        border: "1px solid transparent",
+        boxShadow: "none",
+        ":hover": {
+          boxShadow: "none"
+        }
       }
     }
   },
