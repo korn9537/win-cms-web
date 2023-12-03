@@ -1,12 +1,14 @@
-import { Box, Typography } from "@mui/material";
+import { AddOutlined, DeleteOutline, RemoveRedEyeOutlined } from "@mui/icons-material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { filesize } from "filesize";
 import { useRef, useState } from "react";
-import { IconCloud } from "./Icons";
+import { IconCloud, IconFile } from "./Icons";
 
-const initialState = {};
+// const initialState = {};
 
-const reducer = (state = initialState, action: { payload: any }) => {};
+// const reducer = (state = initialState, action: { payload: any }) => {};
 
 type UploadPanelProps = {
   multiple?: boolean;
@@ -15,10 +17,19 @@ type UploadPanelProps = {
   type?: string; // image
   folderName?: string; // images
   disabled?: boolean;
-  files?: any[];
-  onUpload?: (data: any, files: any[]) => void;
-  onDelete?: (data: any, files: any[]) => void;
-  onDownload?: () => void;
+  files?: UploadFileData[];
+  // onUpload?: (data: UploadFileData, files: UploadFileData[]) => void;
+  // onDelete?: (id: string, files: UploadFileData[]) => void;
+  onChange?: (files: UploadFileData[]) => void;
+  // onDownload?: () => void;
+};
+
+export type UploadFileData = {
+  id: string;
+  file_name: string;
+  file_size: number;
+  file_type: string;
+  url: string;
 };
 
 export default function UploadPanel({ type = "image", folderName = "images", ...props }: UploadPanelProps) {
@@ -27,6 +38,9 @@ export default function UploadPanel({ type = "image", folderName = "images", ...
 
   // refs
   const refUpload = useRef<HTMLInputElement>(null);
+
+  //
+  const [fileList, setFileList] = useState<UploadFileData[]>([]);
 
   // mutate
   const mutation = useMutation({
@@ -54,8 +68,11 @@ export default function UploadPanel({ type = "image", folderName = "images", ...
 
       return data;
     },
-    onSuccess: (data) => {
-      // onUpload(data);
+    onSuccess(data: UploadFileData, variables, context) {
+      setFileList((prev) => [...prev, data]);
+      //
+      // props.onUpload?.(data, [...fileList, data]);
+      props.onChange?.([...fileList, data]);
     }
   });
 
@@ -70,8 +87,13 @@ export default function UploadPanel({ type = "image", folderName = "images", ...
     }
   };
 
-  const handleRemoveFile = () => {
-    // onDelete();
+  const handleRemoveFile = (id: string) => {
+    const filtered = fileList.filter((file) => file.id !== id);
+    //
+    setFileList(filtered);
+    //
+    // props.onDelete?.(id, filtered);
+    props.onChange?.(filtered);
   };
 
   const handleOnDrop = (ev: any) => {
@@ -115,43 +137,99 @@ export default function UploadPanel({ type = "image", folderName = "images", ...
     setIsDragOver(false);
   };
 
+  const handleClickView = (url: string) => {
+    window.open(url, "_blank");
+  };
+
   return (
     <Box>
-      <Box
-        onDrop={handleOnDrop}
-        onDragOver={handleOnDragOver}
-        onDragLeave={handleOnDragLeave}
-        onClick={() => refUpload.current?.click()}
-        sx={{
-          border: "1px dashed",
-          borderColor: isDragOver ? "primary.main" : "black.80",
-          borderRadius: "12px",
-          bgcolor: "neutralGray.10",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-          minHeight: 200,
-          cursor: "pointer",
-          "&:hover": {
-            borderColor: "black.80"
-          }
-        }}
-      >
+      {fileList.length == 0 && (
         <Box
+          onDrop={handleOnDrop}
+          onDragOver={handleOnDragOver}
+          onDragLeave={handleOnDragLeave}
+          onClick={() => refUpload.current?.click()}
           sx={{
-            textAlign: "center"
+            border: "1px dashed",
+            borderColor: isDragOver ? "primary.main" : "black.80",
+            borderRadius: "12px",
+            bgcolor: "neutralGray.10",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            minHeight: 200,
+            cursor: "pointer",
+            "&:hover": {
+              borderColor: "black.80"
+            }
           }}
         >
-          <IconCloud />
-          <Typography variant="body_L_B" display="block" mt={1.5} mb={0.5}>
-            อัพโหลดไฟล์
-          </Typography>
-          <Typography variant="body_M" display="block" color="neutralGray.main">
-            ขนาดไฟล์ไม่เกิน 30 MB
-          </Typography>
+          <Box
+            sx={{
+              textAlign: "center"
+            }}
+          >
+            <IconCloud />
+            <Typography variant="body_L_B" display="block" mt={1.5} mb={0.5}>
+              อัพโหลดไฟล์
+            </Typography>
+            <Typography variant="body_M" display="block" color="neutralGray.main">
+              ขนาดไฟล์ไม่เกิน 30 MB
+            </Typography>
+          </Box>
         </Box>
-      </Box>
+      )}
+      {fileList.length > 0 && (
+        <Box>
+          <Stack spacing={1.5}>
+            {fileList.map((file: UploadFileData, index) => {
+              return (
+                <Stack key={file.id} direction="row" alignItems="center" spacing={1.5}>
+                  <Box
+                    flex={1}
+                    sx={{
+                      bgcolor: (theme) => theme.palette.softBlue[20],
+                      px: 1.5,
+                      py: 1,
+                      borderRadius: "8px"
+                    }}
+                  >
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Stack alignItems="center" direction="row" spacing={1.5}>
+                        <IconFile />
+                        <Typography>{file.file_name}</Typography>
+                      </Stack>
+                      <Typography>{filesize(file.file_size)}</Typography>
+                    </Stack>
+                  </Box>
+                  <Box>
+                    <IconButton onClick={() => handleClickView(file.url)}>
+                      <RemoveRedEyeOutlined />
+                    </IconButton>
+                  </Box>
+                  <Box>
+                    <IconButton onClick={() => handleRemoveFile(file.id)}>
+                      <DeleteOutline />
+                    </IconButton>
+                  </Box>
+                  <Box>
+                    <IconButton
+                      color="primary"
+                      onClick={() => refUpload.current?.click()}
+                      sx={{
+                        visibility: index == fileList.length - 1 ? "visible" : "hidden"
+                      }}
+                    >
+                      <AddOutlined />
+                    </IconButton>
+                  </Box>
+                </Stack>
+              );
+            })}
+          </Stack>
+        </Box>
+      )}
       <input
         hidden
         accept={props.accept || "*"}

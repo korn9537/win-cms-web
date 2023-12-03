@@ -1,7 +1,7 @@
 import UploadPanel from "@/components/UploadPanel";
-import FormContainer, { FormContainerProps } from "@/components/forms/FormContainer";
+import FormContainer from "@/components/forms/FormContainer";
 import { SPACING_FORM } from "@/constants/layout.constant";
-import { BoxProps, Divider, Grid, MenuItem, TextField } from "@mui/material";
+import { Box, Divider, Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { forwardRef, useImperativeHandle } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useBoqCreateStore } from "../../stores/boq-create.store";
@@ -102,6 +102,7 @@ const FormInfo = forwardRef<FormInfoFowardRef, FormInfoProps>(function FormInfo(
 
   // watch
   const model_type_id = watch("model_type_id");
+  const files = watch("files");
 
   return (
     <FormContainer title="ข้อมูลทั่วไป">
@@ -237,7 +238,20 @@ const FormInfo = forwardRef<FormInfoFowardRef, FormInfoProps>(function FormInfo(
         <Grid item xs={4}></Grid>
       </Grid>
       <Divider sx={{ my: 3 }} />
-      <UploadPanel />
+      <Box mb={SPACING_FORM}>
+        <Stack direction="row" spacing={1} alignItems="baseline">
+          <Typography variant="title_S">ไฟล์เอกสาร</Typography>
+          <Typography variant="body_M">{`( ${files.length} ไฟล์ )`}</Typography>
+        </Stack>
+      </Box>
+      <UploadPanel
+        onChange={(fileList) => {
+          setValue(
+            "files",
+            fileList.map((file) => file.id)
+          );
+        }}
+      />
     </FormContainer>
   );
 });

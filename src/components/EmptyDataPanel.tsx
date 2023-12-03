@@ -1,6 +1,5 @@
 import { Box, BoxProps, Stack, Typography } from "@mui/material";
 import ButtonAdd, { ButtonAddProps } from "./ButtonAdd";
-import { SPACING_LAYOUT } from "@/constants/layout.constant";
 
 type EmptyDataPanelProps = {
   title?: string;
@@ -24,7 +23,7 @@ export default function EmptyDataPanel({
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      padding={SPACING_LAYOUT}
+      // padding={SPACING_LAYOUT}
       height={height}
       {...props}
     >
@@ -49,7 +48,7 @@ export default function EmptyDataPanel({
           </Box>
           {onClick && (
             <Box>
-              <ButtonAdd onClick={onClick} {...buttonProps} />
+              <ButtonAdd onClick={onClick} {...(buttonProps == null ? {} : buttonProps)} />
             </Box>
           )}
         </Stack>

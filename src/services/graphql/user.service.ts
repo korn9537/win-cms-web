@@ -5,24 +5,31 @@ import { UserInfoModel, UserModel } from "./models/user.model";
 
 const endpoint = "/graphql";
 
-export const getUsers = async (): Promise<UserModel[]> => {
+export const getUsers = async (search: string = "", status: string = ""): Promise<UserModel[]> => {
   const query = `
-    query users {
-        users {
-          id
-          code
-          fullname
-          thumbnail
-          email
-          is_active
+    query users($search: String, $status: String) {
+        users(search: $search, status: $status) {
+          items {
+            id
+            code
+            fullname
+            thumbnail
+            email
+            is_active
+          }
         }
     }
 `;
 
+  const variables = {
+    search,
+    status
+  };
+
   const {
     data: { data, errors }
-  } = await axios.post(endpoint, { query: compactQuery(query) });
-  return data.users;
+  } = await axios.post(endpoint, { query: compactQuery(query), variables });
+  return data.users.items;
 };
 
 export const getUserByCode = async (code: string): Promise<UserInfoModel> => {

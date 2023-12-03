@@ -19,7 +19,8 @@ export const defaultFormCreateUserValue: FormCreateUserValue = {
   is_active: true,
   department_id: "",
   position_id: "",
-  role_ids: []
+  role_ids: [],
+  type: "user"
 };
 
 export type FormCreateUserValue = {
@@ -37,6 +38,7 @@ export type FormCreateUserValue = {
   department_id: string;
   position_id: string;
   role_ids: string[];
+  type: string;
 };
 
 export type FormCreateUserProps = {
@@ -130,9 +132,26 @@ export default function FormCreateUser(props: FormCreateUserProps) {
             </TextField>
           </Grid>
           <Grid item xs={4}>
-            <TextField label="ประเภทผู้ใช้งาน" select>
-              <MenuItem value="">--กดเพื่อเลือก--</MenuItem>
-            </TextField>
+            <Controller
+              control={control}
+              name="type"
+              rules={{
+                required: "กรุณาระบุ"
+              }}
+              render={({ field }) => (
+                <TextField
+                  label="ประเภทผู้ใช้งาน"
+                  select
+                  {...field}
+                  error={!!errors.type}
+                  helperText={errors.type?.message}
+                >
+                  {/* <MenuItem value="">--กดเพื่อเลือก--</MenuItem> */}
+                  <MenuItem value="user">ผู้ใช้งาน</MenuItem>
+                  <MenuItem value="admin">ผู้ดูแล</MenuItem>
+                </TextField>
+              )}
+            />
           </Grid>
           <Grid item xs={4}></Grid>
           <Grid item xs={4}>

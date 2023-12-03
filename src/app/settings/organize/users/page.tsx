@@ -2,7 +2,9 @@
 
 import ButtonAdd from "@/components/ButtonAdd";
 import ChipStatus from "@/components/ChipStatus";
+import EmptyDataPanel from "@/components/EmptyDataPanel";
 import PageLayout from "@/components/PageLayout";
+import PagePaper from "@/components/PagePaper";
 import TableButton from "@/components/TableButton";
 import { SPACING_LAYOUT } from "@/constants/layout.constant";
 import { getUsers } from "@/services/graphql/user.service";
@@ -19,18 +21,28 @@ import {
   TextField
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import _ from "lodash";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SettingUserPage() {
   // statics
   const router = useRouter();
 
+  // states
+  const [search, setSearch] = useState("");
+  const [position, setPosition] = useState("");
+  const [department, setDepartment] = useState("");
+  const [division, setDivision] = useState("");
+  const [status, setStatus] = useState("");
+
   // queries
   const query = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users", search, status],
     queryFn: async () => {
-      return getUsers();
+      return getUsers(search, status);
     }
+    // initialData: []
   });
 
   // actions
@@ -41,6 +53,10 @@ export default function SettingUserPage() {
   const handleClickView = (code: string) => {
     router.push(`/settings/organize/users/${code}`);
   };
+
+  const handleSearchChange = _.debounce((e: React.ChangeEvent) => {
+    setSearch((e.target as HTMLInputElement).value);
+  }, 500);
 
   return (
     <PageLayout
@@ -54,7 +70,7 @@ export default function SettingUserPage() {
         children: (
           <Grid container spacing={SPACING_LAYOUT}>
             <Grid item xs={4}>
-              <TextField label="ค้นหา" placeholder="ค้นหา" fullWidth />
+              <TextField label="ค้นหา" placeholder="ค้นหา" fullWidth onChange={handleSearchChange} />
             </Grid>
             <Grid item xs={4}>
               <TextField label="ตำแหน่ง" fullWidth select>
@@ -76,48 +92,58 @@ export default function SettingUserPage() {
               </TextField>
             </Grid>
             <Grid item xs={4}>
-              <TextField label="สถานะ" fullWidth select>
+              <TextField label="สถานะ" fullWidth select value={status} onChange={(e) => setStatus(e.target.value)}>
                 <MenuItem value="">แสดงทั้งหมด</MenuItem>
+                <MenuItem value="active">เปิดใช้งาน</MenuItem>
+                <MenuItem value="inactive">ปิดใช้งาน</MenuItem>
               </TextField>
             </Grid>
           </Grid>
         )
       }}
     >
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>รูปถ่าย</TableCell>
-              <TableCell>รหัสพนักงาน</TableCell>
-              <TableCell>ชื่อ - สกุล</TableCell>
-              <TableCell>ตำแหน่ง</TableCell>
-              <TableCell>ฝ่าย</TableCell>
-              <TableCell>สถานะ</TableCell>
-              <TableCell></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {query.data?.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
-                  <img src="/icons/User.png" alt="" />
-                </TableCell>
-                <TableCell>{user.code}</TableCell>
-                <TableCell>{user.fullname}</TableCell>
+      {query.isPending && <div>Loading...</div>}
+      {query.isPending == false && query.data?.length == 0 && (
+        <PagePaper>
+          <EmptyDataPanel onClick={handleClickAdd} />
+        </PagePaper>
+      )}
+      {query.data && query.data?.length > 0 && (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>รูปถ่าย</TableCell>
+                <TableCell>รหัสพนักงาน</TableCell>
+                <TableCell>ชื่อ - สกุล</TableCell>
+                <TableCell>ตำแหน่ง</TableCell>
+                <TableCell>ฝ่าย</TableCell>
+                <TableCell>สถานะ</TableCell>
                 <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell>
-                  <ChipStatus state={user.is_active ? "active" : "inactive"} />
-                </TableCell>
-                <TableCell>
-                  <TableButton icon="view" onClick={() => handleClickView(user.code)} />
-                </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {query.data?.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <img src="/icons/User.png" alt="" />
+                  </TableCell>
+                  <TableCell>{user.code}</TableCell>
+                  <TableCell>{user.fullname}</TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell>
+                    <ChipStatus state={user.is_active ? "active" : "inactive"} />
+                  </TableCell>
+                  <TableCell>
+                    <TableButton icon="view" onClick={() => handleClickView(user.code)} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </PageLayout>
   );
 }
