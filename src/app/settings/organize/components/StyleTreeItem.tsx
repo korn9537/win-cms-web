@@ -1,15 +1,15 @@
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DriveFileMoveRoundedIcon from "@mui/icons-material/DriveFileMoveRounded";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
-import { ButtonBase, Stack } from "@mui/material";
+import { ButtonBase, Menu, MenuItem, Stack } from "@mui/material";
 import Box from "@mui/material/Box";
 import { SvgIconProps } from "@mui/material/SvgIcon";
 import Typography from "@mui/material/Typography";
 import { styled, useTheme } from "@mui/material/styles";
 import { TreeItem, TreeItemProps, treeItemClasses } from "@mui/x-tree-view/TreeItem";
 import * as React from "react";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 declare module "react" {
   interface CSSProperties {
@@ -27,6 +27,9 @@ type StyledTreeItemProps = TreeItemProps & {
   labelInfo?: string;
   labelText: string;
   onActionClick?: (action: string) => void;
+  disableAdd?: boolean;
+  disableMove?: boolean;
+  disableMore?: boolean;
 };
 
 const StyledTreeItemRoot = styled(TreeItem)(({ theme }) => ({
@@ -43,6 +46,9 @@ const StyledTreeItemRoot = styled(TreeItem)(({ theme }) => ({
     // },
     "& .actions": {
       display: "none"
+    },
+    "& button.Mui-disabled": {
+      opacity: 0.3
     },
     // "&.Mui-expanded": {
     //   fontWeight: theme.typography.fontWeightRegular
@@ -77,6 +83,7 @@ export const StyledTreeItem = React.forwardRef(function StyledTreeItem(
   props: StyledTreeItemProps,
   ref: React.Ref<HTMLLIElement>
 ) {
+  // statics
   const theme = useTheme();
   const {
     bgColor,
@@ -87,6 +94,9 @@ export const StyledTreeItem = React.forwardRef(function StyledTreeItem(
     colorForDarkMode,
     bgColorForDarkMode,
     onActionClick,
+    disableAdd = false,
+    disableMove = false,
+    disableMore = false,
     ...other
   } = props;
 
@@ -95,116 +105,91 @@ export const StyledTreeItem = React.forwardRef(function StyledTreeItem(
     "--tree-view-bg-color": theme.palette.mode !== "dark" ? bgColor : bgColorForDarkMode
   };
 
+  // states
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = (action: string) => () => {
+    setAnchorEl(null);
+
+    if (action == "close") {
+      return;
+    }
+
+    onActionClick?.(action);
+  };
+
+  // actions
   const handleOnClick = (action: string) => (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.stopPropagation();
     onActionClick?.(action);
   };
 
   return (
-    <StyledTreeItemRoot
-      collapseIcon={
-        <ButtonBase onClick={handleOnClick("collapse")}>
-          <ExpandMoreIcon />
-        </ButtonBase>
-      }
-      expandIcon={
-        <ButtonBase onClick={handleOnClick("expand")}>
-          <ChevronRightIcon />
-        </ButtonBase>
-      }
-      label={
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            p: 0.5,
-            pr: 0
-          }}
-        >
-          {LabelIcon && <Box component={LabelIcon} color="inherit" sx={{ mr: 1 }} />}
-          <Typography variant="body_M" sx={{ fontWeight: "inherit", flexGrow: 1 }}>
-            {labelText}
-          </Typography>
-          <Typography variant="body_XS" color="inherit">
-            {labelInfo}
-          </Typography>
-          <Box className="actions">
-            <Stack direction="row" spacing={2}>
-              <ButtonBase onClick={handleOnClick("add")}>
-                <AddRoundedIcon />
-              </ButtonBase>
-              <ButtonBase onClick={handleOnClick("move")}>
-                <DriveFileMoveRoundedIcon />
-              </ButtonBase>
-              <ButtonBase onClick={handleOnClick("more")}>
-                <MoreVertRoundedIcon />
-              </ButtonBase>
-            </Stack>
+    <>
+      <StyledTreeItemRoot
+        collapseIcon={
+          <ButtonBase onClick={handleOnClick("collapse")}>
+            <ExpandMoreIcon />
+          </ButtonBase>
+        }
+        expandIcon={
+          <ButtonBase onClick={handleOnClick("expand")}>
+            <ChevronRightIcon />
+          </ButtonBase>
+        }
+        label={
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              p: 0.5,
+              pr: 0
+            }}
+          >
+            {LabelIcon && <Box component={LabelIcon} color="inherit" sx={{ mr: 1 }} />}
+            <Typography variant="body_M" sx={{ fontWeight: "inherit", flexGrow: 1 }}>
+              {labelText}
+            </Typography>
+            <Typography variant="body_XS" color="inherit">
+              {labelInfo}
+            </Typography>
+            <Box className="actions">
+              <Stack direction="row" spacing={2}>
+                <ButtonBase onClick={handleOnClick("add")} disabled={disableAdd}>
+                  <AddRoundedIcon />
+                </ButtonBase>
+                <ButtonBase onClick={handleOnClick("move")} disabled={disableMove}>
+                  <DriveFileMoveRoundedIcon />
+                </ButtonBase>
+                <ButtonBase onClick={handleClick} disabled={disableMore}>
+                  <MoreVertRoundedIcon />
+                </ButtonBase>
+              </Stack>
+            </Box>
           </Box>
-        </Box>
-      }
-      style={styleProps}
-      {...other}
-      ref={ref}
-    />
+        }
+        style={styleProps}
+        {...other}
+        ref={ref}
+      />
+      {/*  */}
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose("close")}
+        MenuListProps={{
+          "aria-labelledby": "basic-button"
+        }}
+      >
+        <MenuItem onClick={handleClose("edit")}>Edit</MenuItem>
+        <MenuItem onClick={handleClose("delete")}>Delete</MenuItem>
+      </Menu>
+    </>
   );
 });
-
-// export default function GmailTreeView() {
-//   return (
-//     <TreeView
-//       aria-label="gmail"
-//       defaultExpanded={["3"]}
-//       defaultCollapseIcon={<ArrowDropDownIcon />}
-//       defaultExpandIcon={<ArrowRightIcon />}
-//       defaultEndIcon={<div style={{ width: 24 }} />}
-//       sx={{ height: 264, flexGrow: 1, maxWidth: 400, overflowY: "auto" }}
-//     >
-//       <StyledTreeItem nodeId="1" labelText="All Mail" labelIcon={MailIcon} />
-//       <StyledTreeItem nodeId="2" labelText="Trash" labelIcon={DeleteIcon} />
-//       <StyledTreeItem nodeId="3" labelText="Categories" labelIcon={Label}>
-//         <StyledTreeItem
-//           nodeId="5"
-//           labelText="Social"
-//           labelIcon={SupervisorAccountIcon}
-//           labelInfo="90"
-//           color="#1a73e8"
-//           bgColor="#e8f0fe"
-//           colorForDarkMode="#B8E7FB"
-//           bgColorForDarkMode="#071318"
-//         />
-//         <StyledTreeItem
-//           nodeId="6"
-//           labelText="Updates"
-//           labelIcon={InfoIcon}
-//           labelInfo="2,294"
-//           color="#e3742f"
-//           bgColor="#fcefe3"
-//           colorForDarkMode="#FFE2B7"
-//           bgColorForDarkMode="#191207"
-//         />
-//         <StyledTreeItem
-//           nodeId="7"
-//           labelText="Forums"
-//           labelIcon={ForumIcon}
-//           labelInfo="3,566"
-//           color="#a250f5"
-//           bgColor="#f3e8fd"
-//           colorForDarkMode="#D9B8FB"
-//           bgColorForDarkMode="#100719"
-//         />
-//         <StyledTreeItem
-//           nodeId="8"
-//           labelText="Promotions"
-//           labelIcon={LocalOfferIcon}
-//           labelInfo="733"
-//           color="#3c8039"
-//           bgColor="#e6f4ea"
-//           colorForDarkMode="#CCE8CD"
-//           bgColorForDarkMode="#0C130D"
-//         />
-//       </StyledTreeItem>
-//       <StyledTreeItem nodeId="4" labelText="History" labelIcon={Label} />
-//     </TreeView>
-//   );
-// }

@@ -44,7 +44,8 @@ export default function SettingUserInfoPage(props: SettingUserInfoPageProps) {
         is_active: user.is_active,
         department_id: user.department_id ?? "",
         position_id: user.position_id ?? "",
-        role_ids: user.role_ids ?? []
+        role_ids: user.role_ids ?? [],
+        type: "user"
       };
     }
   });
@@ -83,8 +84,8 @@ export default function SettingUserInfoPage(props: SettingUserInfoPageProps) {
 
       showToast("success");
       handleOnBack();
-    } catch (error) {
-      showToast("error");
+    } catch (error: any) {
+      showToast("error", error.response?.data?.message);
     }
   };
 

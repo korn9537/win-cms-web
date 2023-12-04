@@ -1,26 +1,36 @@
 "use client";
 
+import DeleteDialog from "@/components/dialogs/DeleteDialog";
 import { useDialog } from "@/hooks/useDialog";
 import { OrganizeModel } from "@/services/graphql/models/organize.model";
-import { TreeViewModel, convertOrganizeListToTree, getOrganizeList } from "@/services/graphql/organize.service";
+import {
+  TreeViewModel,
+  convertOrganizeListToTree,
+  deleteOrganize,
+  getOrganizeList
+} from "@/services/graphql/organize.service";
+import { useLayoutStore } from "@/stores/layout.store";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TreeView } from "@mui/x-tree-view";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import React, { useState } from "react";
 import CreateBuDialog from "./CreateBuDialog";
+import MoveBuDialog from "./MoveBuDialog";
 import { StyledTreeItem } from "./StyleTreeItem";
 
-export default function OrganizeTree() {
+export type OrganizeTreeProps = {
+  onSelected?: (node?: OrganizeModel) => void;
+};
+
+export default function OrganizeTree(props: OrganizeTreeProps) {
   // statics
+  const { showToast } = useLayoutStore((state) => ({
+    showToast: state.showToast
+  }));
+
   const dialogBu = useDialog({
     onConfirm(data, dialog, res) {
-      console.log({
-        data,
-        dialog,
-        res
-      });
-
       dialog.close();
       //
       refetch();
@@ -30,10 +40,53 @@ export default function OrganizeTree() {
     }
   });
 
+  const dialogDelete = useDialog({
+    onConfirm: async (data, dialog, res) => {
+      try {
+        dialog.showLoading(true);
+        //
+        await deleteOrganize(data.node.id);
+        //
+        dialog.showLoading(false);
+        //
+        dialog.close();
+        //
+        refetch();
+      } catch (error: any) {
+        showToast("error", error.response?.data?.message);
+        dialog.showLoading(false);
+      }
+    },
+    onCancel(data, dialog) {
+      dialog.close();
+    }
+  });
+
+  const dialogMove = useDialog({
+    onConfirm: async (data, dialog, res) => {
+      try {
+        // dialog.showLoading(true);
+        // //
+        // await deleteOrganize(data.node.id);
+        // //
+        // dialog.showLoading(false);
+        // //
+        // dialog.close();
+        // //
+        // refetch();
+      } catch (error: any) {
+        showToast("error", error.response?.data?.message);
+        dialog.showLoading(false);
+      }
+    },
+    onCancel(data, dialog) {
+      dialog.close();
+    }
+  });
+
   // states
-  const [expanded, setExpanded] = useState<string[]>([]);
+  const [expanded, setExpanded] = useState<string[]>(["root"]);
   const [selected, setSelected] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<string>("");
 
   // query
   const { data, isLoading, refetch } = useQuery({
@@ -59,53 +112,56 @@ export default function OrganizeTree() {
   const handleSelect = (event: React.SyntheticEvent, nodeId: string) => {
     setSelected(nodeId);
     //
-    const item = data?.items.find((item) => item.id == nodeId);
-    setSelectedType(item?.type || "");
+    if (props.onSelected) {
+      const item = data?.items.find((item) => item.id == nodeId);
+      //
+      props.onSelected(item);
+    }
   };
 
   const handleOnActionClick = (action: string, node: TreeViewModel) => {
-    // console.log({
-    //   action,
-    //   node
-    // });
-    //
     if (action == "add") {
       dialogBu.open("สร้าง BU", null, {
         action: action,
-        parent: node,
+        parent: node.data,
         node: null
       });
+      return;
     }
 
     if (action == "edit") {
       dialogBu.open("แก้ไข BU", null, {
         action: action,
         parent: null,
-        node: node
+        node: node.data
       });
+      return;
     }
 
     if (action == "expand") {
       setExpanded([...expanded, node.id]);
+      return;
     }
 
     if (action == "collapse") {
       setExpanded(expanded.filter((id) => id != node.id));
+      return;
     }
 
-    // if (action == "delete") {
-    //   dialogBu.open("ลบ BU", null, {
-    //     action: action,
-    //     parent: null,
-    //     node: node
-    //   });
-    // }
-  };
+    if (action == "delete") {
+      dialogDelete.open(null, null, {
+        node: node.data
+      });
+      return;
+    }
 
-  // console.log({
-  //   data,
-  //   isLoading
-  // });
+    if (action == "move") {
+      dialogMove.open(null, null, {
+        node: node.data
+      });
+      return;
+    }
+  };
 
   const renderTree = (nodes: TreeViewModel) => (
     <StyledTreeItem
@@ -113,6 +169,9 @@ export default function OrganizeTree() {
       nodeId={nodes.id}
       labelText={nodes.name}
       onActionClick={(action) => handleOnActionClick(action, nodes)}
+      //   disableAdd={nodes.id == "root"}
+      disableMove={nodes.id == "root"}
+      disableMore={nodes.id == "root"}
     >
       {Array.isArray(nodes.children) ? nodes.children.map((node) => renderTree(node)) : null}
     </StyledTreeItem>
@@ -135,6 +194,8 @@ export default function OrganizeTree() {
       </TreeView>
       {/*  */}
       <CreateBuDialog {...dialogBu.dialogProps} />
+      <DeleteDialog {...dialogDelete.dialogProps} />
+      <MoveBuDialog {...dialogMove.dialogProps} />
     </>
   );
 }

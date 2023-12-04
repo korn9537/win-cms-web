@@ -5,6 +5,6 @@ export type CreateOrganizeDTO = {
   parent_id: string | null;
 };
 
-export type UpdateUserDTO = CreateOrganizeDTO & {
+export type UpdateOrganizeDTO = CreateOrganizeDTO & {
   // id: string;
 };

@@ -13,7 +13,7 @@ export type CreateUserDTO = {
 
   password: string;
 
-  password_no_expire?: boolean;
+  // password_no_expire?: boolean;
 
   is_active?: boolean;
 

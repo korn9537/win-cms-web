@@ -4,6 +4,6 @@ export type OrganizeModel = {
   name_th: string;
   name_en: string;
   level: number;
-  parent_id: string;
+  parent_id: string | null;
   type: string;
 };

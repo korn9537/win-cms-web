@@ -48,7 +48,7 @@ export default function SettingCreateUserPage() {
         last_name: values.last_name,
         email: values.email,
         password: values.password,
-        password_no_expire: values.password_no_expire,
+        // password_no_expire: values.password_no_expire,
         mobile: values.mobile,
         is_active: values.is_active,
         department_id: values.department_id,
@@ -60,8 +60,8 @@ export default function SettingCreateUserPage() {
       showToast("success");
 
       handleOnBack();
-    } catch (error) {
-      showToast("error");
+    } catch (error: any) {
+      showToast("error", error.response?.data?.message);
     }
   };
 
