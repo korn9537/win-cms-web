@@ -6,6 +6,7 @@ import EmptyDataPanel from "@/components/EmptyDataPanel";
 import PageLayout from "@/components/PageLayout";
 import PagePaper from "@/components/PagePaper";
 import TableButton from "@/components/TableButton";
+import { TABLE_COLUMN_SIZE } from "@/constants/content.constant";
 import { SPACING_LAYOUT } from "@/constants/layout.constant";
 import { getUsers } from "@/services/graphql/user.service";
 import {
@@ -47,11 +48,11 @@ export default function SettingUserPage() {
 
   // actions
   const handleClickAdd = () => {
-    router.push(`/settings/organize/users/create`);
+    router.push(`/settings/users/create`);
   };
 
   const handleClickView = (code: string) => {
-    router.push(`/settings/organize/users/${code}`);
+    router.push(`/settings/users/${code}`);
   };
 
   const handleSearchChange = _.debounce((e: React.ChangeEvent) => {
@@ -113,13 +114,13 @@ export default function SettingUserPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>รูปถ่าย</TableCell>
-                <TableCell>รหัสพนักงาน</TableCell>
+                <TableCell width={80}>รูปถ่าย</TableCell>
+                <TableCell width={130}>รหัสพนักงาน</TableCell>
                 <TableCell>ชื่อ - สกุล</TableCell>
                 <TableCell>ตำแหน่ง</TableCell>
                 <TableCell>ฝ่าย</TableCell>
-                <TableCell>สถานะ</TableCell>
-                <TableCell></TableCell>
+                <TableCell width={TABLE_COLUMN_SIZE.STATUS}>สถานะ</TableCell>
+                <TableCell width={TABLE_COLUMN_SIZE.ACTION_1}></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

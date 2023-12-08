@@ -3,7 +3,7 @@
 import ButtonMenu from "@/components/ButtonMenu";
 import { IconFile, IconImport, IconUpload } from "@/components/Icons";
 import PageLayout from "@/components/PageLayout";
-import ComfirmDialog from "@/components/dialogs/ComfirmDialog";
+import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
 import FormWizardAction from "@/components/forms/FormWizardAction";
 import FormWizardBar from "@/components/forms/FormWizardBar";
 import { useDialog } from "@/hooks/useDialog";
@@ -341,7 +341,7 @@ export default function ProjectBoqCreatePage(props: ProjectBoqCreatePageProps) {
       </PageLayout>
 
       {/* Dialogs */}
-      <ComfirmDialog
+      <ConfirmDialog
         {...dialogConfirm.dialogProps}
         title="ต้องการบันทึกข้อมูลเพื่อรอการอนุมัติใช่หรือไม่"
         content="หากไม่ต้องการส่งอนุมัติทันที ให้บันทึกข้อมูลเป็นแบบร่าง"

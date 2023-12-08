@@ -1,3 +1,4 @@
+import { compactQuery } from "@/helpers/compact-query";
 import axios from "axios";
 
 const endpoint = "/graphql";
@@ -50,7 +51,7 @@ export const getMasterItems = async (): Promise<MasterItemModel[]> => {
 `;
 
   const { data } = await axios.post(endpoint, {
-    query
+    query: compactQuery(query)
   });
 
   return data.data.items;
@@ -68,7 +69,7 @@ export const getMasterItemUnits = async (): Promise<MasterItemUnitModel[]> => {
 `;
 
   const { data } = await axios.post(endpoint, {
-    query
+    query: compactQuery(query)
   });
 
   return data.data.items;

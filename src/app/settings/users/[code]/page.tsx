@@ -6,12 +6,18 @@ import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import FormCreateUser, { FormCreateUserValue, defaultFormCreateUserValue } from "../components/FormCreateUser";
 import { useMutation } from "@tanstack/react-query";
-import { CreateUserDTO } from "@/services/graphql/dto/create-user.input";
-import { createUser } from "@/services/graphql/user.service";
+import { CreateUserDTO, UpdateUserDTO } from "@/services/graphql/dto/create-user.input";
+import { createUser, getUserByCode, updateUser } from "@/services/graphql/user.service";
 import { useLayoutStore } from "@/stores/layout.store";
 import { useEffect } from "react";
 
-export default function SettingCreateUserPage() {
+type SettingUserInfoPageProps = {
+  params: {
+    code: string;
+  };
+};
+
+export default function SettingUserInfoPage(props: SettingUserInfoPageProps) {
   // statics
   const router = useRouter();
   const { showBackdrop, showToast } = useLayoutStore((state) => ({
@@ -21,44 +27,62 @@ export default function SettingCreateUserPage() {
 
   // forms
   const userForm = useForm<FormCreateUserValue>({
-    defaultValues: defaultFormCreateUserValue
+    defaultValues: async () => {
+      const user = await getUserByCode(props.params.code as string);
+
+      return {
+        id: user.id,
+        logo_image_id: user.image_id ?? "",
+        logo_image_url: user.thumbnail ?? "",
+        code: user.code,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        password: user.password ?? "",
+        password_no_expire: false,
+        mobile: user.mobile,
+        is_active: user.is_active,
+        department_id: user.department_id ?? "",
+        position_id: user.position_id ?? "",
+        role_ids: user.role_ids ?? [],
+        type: "user"
+      };
+    }
   });
 
   // mutations
-  const createUserMutation = useMutation({
-    mutationFn: (body: CreateUserDTO) => {
-      return createUser(body);
+  const updateUserMutation = useMutation({
+    mutationFn: (body: UpdateUserDTO) => {
+      return updateUser(body);
     }
   });
 
   useEffect(() => {
-    showBackdrop(createUserMutation.isPending);
-  }, [createUserMutation.isPending]);
+    showBackdrop(updateUserMutation.isPending);
+  }, [updateUserMutation.isPending]);
 
   // actions
   const handleOnBack = () => {
-    router.replace("/settings/organize/users");
+    router.replace("/settings/users");
   };
 
   const handleOnSubmit = async (values: FormCreateUserValue) => {
     try {
-      const body: CreateUserDTO = {
+      const body: UpdateUserDTO = {
+        id: values.id ?? "",
         code: values.code,
         first_name: values.first_name,
         last_name: values.last_name,
         email: values.email,
-        password: values.password,
-        // password_no_expire: values.password_no_expire,
         mobile: values.mobile,
         is_active: values.is_active,
         department_id: values.department_id,
         position_id: values.position_id,
         role_ids: values.role_ids
       };
-      await createUserMutation.mutateAsync(body);
+      await updateUserMutation.mutateAsync(body);
 
       showToast("success");
-
       handleOnBack();
     } catch (error: any) {
       showToast("error", error.response?.data?.message);
@@ -70,12 +94,12 @@ export default function SettingCreateUserPage() {
       type="detail"
       clean
       toolbar={{
-        title: "เพิ่มข้อมูลผู้ใช้งาน",
+        title: "ข้อมูลผู้ใช้งาน",
         backFunction: handleOnBack
       }}
     >
       <FormProvider {...userForm}>
-        <FormBase onSubmit={userForm.handleSubmit(handleOnSubmit)} showSubmitButton>
+        <FormBase onSubmit={userForm.handleSubmit(handleOnSubmit)} showSubmitButton showCancelButton>
           <FormCreateUser />
         </FormBase>
       </FormProvider>

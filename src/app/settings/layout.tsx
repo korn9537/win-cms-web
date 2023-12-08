@@ -7,38 +7,62 @@ import _ from "lodash";
 
 export const SETIING_MENUS: MyMenu[] = [
   {
-    key: "setting-organize",
-    title: "ข้อมูลผู้ใช้งาน",
-    image: "/images/modules/1.png",
-    // href: "/setting-data",
     icon: <IconInformation />,
-    subMenus: [
-      {
-        icon: <IconInformation />,
-        key: "users",
-        title: "ผู้ใช้งาน",
-        href: "/settings/organize/users"
-      },
-      {
-        icon: <IconInformation />,
-        key: "permissions",
-        title: "สิทธิการใช้งาน",
-        href: "/settings/organize/permissions"
-      }
-    ]
+    key: "users",
+    title: "ผู้ใช้งาน",
+    href: "/settings/users"
   },
   {
     icon: <IconInformation />,
-    key: "departments",
-    title: "แผนก",
-    href: "/settings/organize/departments"
+    key: "roles",
+    title: "กลุ่มตำแหน่ง",
+    href: "/settings/roles"
   },
   {
     icon: <IconInformation />,
-    key: "positions",
-    title: "ตำแหน่งงาน",
-    href: "/settings/organize/positions"
+    key: "permissions",
+    title: "สิทธิการใช้งาน",
+    href: "/settings/permissions"
+  },
+  {
+    icon: <IconInformation />,
+    key: "organizes",
+    title: "ผังองค์กร",
+    href: "/settings/organize"
   }
+  // {
+  //   key: "setting-organize",
+  //   title: "ข้อมูลผู้ใช้งาน",
+  //   image: "/images/modules/1.png",
+  //   // href: "/setting-data",
+  //   icon: <IconInformation />,
+  //   subMenus: [
+  //     {
+  //       icon: <IconInformation />,
+  //       key: "users",
+  //       title: "ผู้ใช้งาน",
+  //       href: "/settings/users"
+  //     },
+  //     {
+  //       icon: <IconInformation />,
+  //       key: "permissions",
+  //       title: "สิทธิการใช้งาน",
+  //       href: "/settings/permissions"
+  //     }
+  //   ]
+  // }
+  // {
+  //   icon: <IconInformation />,
+  //   key: "departments",
+  //   title: "แผนก",
+  //   href: "/settings/organize/departments"
+  // },
+  // {
+  //   icon: <IconInformation />,
+  //   key: "positions",
+  //   title: "ตำแหน่งงาน",
+  //   href: "/settings/organize/positions"
+  // }
 ];
 
 type CompanyLayoutProps = {

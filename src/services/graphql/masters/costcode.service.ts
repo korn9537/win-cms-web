@@ -1,3 +1,4 @@
+import { compactQuery } from "@/helpers/compact-query";
 import axios from "axios";
 
 const endpoint = "/graphql";
@@ -30,7 +31,7 @@ export const getMasterCostCodes = async (): Promise<MasterCostCodeModel[]> => {
 `;
 
   const { data } = await axios.post(endpoint, {
-    query
+    query: compactQuery(query)
   });
 
   return data.data.items;

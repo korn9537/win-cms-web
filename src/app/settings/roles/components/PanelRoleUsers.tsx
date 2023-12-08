@@ -1,17 +1,11 @@
-"use client";
-
 import ButtonAdd from "@/components/ButtonAdd";
 import EmptyDataPanel from "@/components/EmptyDataPanel";
-import PageLayout from "@/components/PageLayout";
-import PagePaper from "@/components/PagePaper";
 import TableButton from "@/components/TableButton";
-import { SPACING_LAYOUT } from "@/constants/layout.constant";
 import { useDialog } from "@/hooks/useDialog";
-import { addOrganizeUsers, getOrganizeUsers, removeOrganizeUsers } from "@/services/graphql/organize.service";
+import { addUsersToRole, getUsersInRole, removeUserFromRole } from "@/services/graphql/masters/master-role.service";
 import { useLayoutStore } from "@/stores/layout.store";
 import {
   Box,
-  Grid,
   Stack,
   Table,
   TableBody,
@@ -22,48 +16,13 @@ import {
   Typography
 } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import SelectUserDialog from "../components/SelectUserDialog";
-import OrganizeTree from "./components/OrganizeTree";
+import SelectUserDialog from "../../components/SelectUserDialog";
 
-export default function SettingOrganizePage() {
-  // statics
-
-  // states
-  const [selectedOrganizeId, setSelectedOrganizeId] = useState<string>("");
-
-  // query
-
-  // actions
-
-  return (
-    <PageLayout
-      type="detail"
-      toolbar={{
-        title: "ผังองค์กร"
-      }}
-    >
-      <Grid container spacing={SPACING_LAYOUT}>
-        <Grid item xs={6}>
-          <PagePaper sx={{ height: "100%" }}>
-            <OrganizeTree onSelected={(node) => setSelectedOrganizeId(node?.id || "")} />
-          </PagePaper>
-        </Grid>
-        <Grid item xs={6}>
-          <PagePaper sx={{ height: "100%" }}>
-            <PanelOrganizeUsers organizeId={selectedOrganizeId} />
-          </PagePaper>
-        </Grid>
-      </Grid>
-    </PageLayout>
-  );
-}
-
-type PanelOrganizeUsersProps = {
-  organizeId?: string;
+type PanelRoleUsersProps = {
+  roleId?: string;
 };
 
-function PanelOrganizeUsers(props: PanelOrganizeUsersProps) {
+export function PanelRoleUsers(props: PanelRoleUsersProps) {
   // statics
   const { showToast } = useLayoutStore((state) => ({
     showToast: state.showToast
@@ -88,23 +47,23 @@ function PanelOrganizeUsers(props: PanelOrganizeUsersProps) {
 
   // query
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["organize-users", props.organizeId],
+    queryKey: ["role-users", props.roleId],
     queryFn: async () => {
-      return getOrganizeUsers(props.organizeId || "");
+      return getUsersInRole(props.roleId || "");
     },
-    enabled: props.organizeId != null && props.organizeId != ""
+    enabled: props.roleId != null && props.roleId != ""
   });
 
   // mutations
   const mutateSaveUser = useMutation({
     mutationFn: async (users: string[]) => {
-      return addOrganizeUsers(props.organizeId || "", users);
+      return addUsersToRole(props.roleId || "", users);
     }
   });
 
   const mutateDeleteUser = useMutation({
     mutationFn: async (userId: string) => {
-      return removeOrganizeUsers(userId);
+      return removeUserFromRole(props.roleId || "", userId);
     }
   });
 
@@ -123,7 +82,7 @@ function PanelOrganizeUsers(props: PanelOrganizeUsersProps) {
     }
   };
 
-  if (props.organizeId == null || props.organizeId == "") {
+  if (props.roleId == null || props.roleId == "") {
     return null;
   }
 
@@ -131,8 +90,8 @@ function PanelOrganizeUsers(props: PanelOrganizeUsersProps) {
     <Box>
       <Box mb={2}>
         <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
-          <Typography variant="title_S">ผู้ใช้งาน</Typography>
-          <ButtonAdd onClick={handleClickAdd} text="เพิ่มผู้ใช้งาน" />
+          <Typography variant="title_S">ผู้ใช้งาน{(data?.length ?? 0) > 0 && ` (${data?.length})`}</Typography>
+          <ButtonAdd variant="text" onClick={handleClickAdd} text="เพิ่มผู้ใช้งาน" />
         </Stack>
       </Box>
 
@@ -162,7 +121,7 @@ function PanelOrganizeUsers(props: PanelOrganizeUsersProps) {
           </Table>
         </TableContainer>
       )}
-
+      {/* Dialogs */}
       <SelectUserDialog {...dialogSelectUser.dialogProps} />
     </Box>
   );
