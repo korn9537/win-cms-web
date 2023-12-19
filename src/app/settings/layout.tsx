@@ -21,7 +21,7 @@ export const SETIING_MENUS: MyMenu[] = [
   {
     icon: <IconInformation />,
     key: "permissions",
-    title: "สิทธิการใช้งาน",
+    title: "สิทธิ์การใช้งาน",
     href: "/settings/permissions"
   },
   {
@@ -46,7 +46,7 @@ export const SETIING_MENUS: MyMenu[] = [
   //     {
   //       icon: <IconInformation />,
   //       key: "permissions",
-  //       title: "สิทธิการใช้งาน",
+  //       title: "สิทธิ์การใช้งาน",
   //       href: "/settings/permissions"
   //     }
   //   ]

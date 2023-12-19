@@ -10,7 +10,7 @@ import * as React from "react";
 type ConfirmDialogProps = {
   children?: React.ReactNode;
   action?: React.ReactNode;
-} & UseDialogProps;
+} & UseDialogProps<any, any>;
 
 export default function ConfirmDialog(props: ConfirmDialogProps) {
   const { open, onCancel, onConfirm, title, content, ...dialog } = props;

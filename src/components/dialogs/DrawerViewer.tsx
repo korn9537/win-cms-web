@@ -1,10 +1,10 @@
-import { UseDialogProps } from '@/hooks/useDialog';
-import { Drawer } from '@mui/material';
-import React from 'react';
+import { UseDialogProps } from "@/hooks/useDialog";
+import { Drawer } from "@mui/material";
+import React from "react";
 
 type DrawerViewerProps = {
   children: React.ReactNode;
-} & UseDialogProps;
+} & UseDialogProps<any, any>;
 
 export default function DrawerViewer(props: DrawerViewerProps) {
   const { open, onCancel, onConfirm, title, data, children } = props;
@@ -12,9 +12,9 @@ export default function DrawerViewer(props: DrawerViewerProps) {
     <Drawer
       className="drawer-bg-gray"
       PaperProps={{
-        sx: { width: '70%', padding: 4 },
+        sx: { width: "70%", padding: 4 }
       }}
-      anchor={'right'}
+      anchor={"right"}
       open={open}
       onClose={onCancel}
       transitionDuration={0}

@@ -27,7 +27,7 @@ import { BoqItem, BoqItemGroup, useBoqCreateStore } from "../../stores/boq-creat
 import numeral from "numeral";
 import _ from "lodash";
 
-type BoqItemDialogProps = {} & UseDialogProps;
+type BoqItemDialogProps = {} & UseDialogProps<any, any>;
 
 const defaultBoqFormValues: CreateBoqFormValues = {
   type: "",
@@ -184,17 +184,19 @@ export default function BoqItemDialog(props: BoqItemDialogProps) {
         number: "",
         //
         parents: [],
-        parent_id: parentId,
         //
-        type: "group",
-        //
-        unit_rate_total: 0,
         work_rate_total: 0,
+        unit_rate_total: 0,
         //
         total: 0,
         //
+        type: "group",
+        //
+        parent_id: parentId,
+        //
         group_childs: [],
         material_childs: [],
+        childs: [],
         //
         level: 0
       } as BoqItemGroup;

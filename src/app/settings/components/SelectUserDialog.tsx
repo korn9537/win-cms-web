@@ -23,7 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
 import { useEffect, useMemo, useState } from "react";
 
-type SelectUserDialogProps = {} & UseDialogProps;
+type SelectUserDialogProps = {} & UseDialogProps<any, any>;
 
 export default function SelectUserDialog(props: SelectUserDialogProps) {
   // statics

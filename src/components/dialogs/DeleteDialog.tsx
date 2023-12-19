@@ -1,16 +1,15 @@
-import { UseDialogProps } from '@/hooks/useDialog';
-import { Box, Typography } from '@mui/material';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import * as React from 'react';
+import { UseDialogProps } from "@/hooks/useDialog";
+import { Box, Typography } from "@mui/material";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import * as React from "react";
 
 type DeleteDialogProps = {
   hasRelatedData?: boolean;
-} & UseDialogProps;
+} & UseDialogProps<any, any>;
 
 export default function DeleteDialog(props: DeleteDialogProps) {
   // statics

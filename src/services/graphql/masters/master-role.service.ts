@@ -6,7 +6,7 @@ import { UserModel } from "../models/user.model";
 
 const endpoint = "/graphql";
 
-export const getMasterRoles = async (): Promise<RoleModel[]> => {
+export const getMasterRoles = async (withCount: boolean = false): Promise<RoleModel[]> => {
   const query = `
     query userRoles {
       userRoles {
@@ -15,6 +15,7 @@ export const getMasterRoles = async (): Promise<RoleModel[]> => {
         name_th
         name_en
         is_active
+        ${withCount ? "user_count" : ""}
       }
     }
 `;

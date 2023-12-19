@@ -4,4 +4,5 @@ export type RoleModel = {
   name_th: string;
   name_en?: string;
   is_active: boolean;
+  user_count?: number;
 };

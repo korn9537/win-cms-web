@@ -3,18 +3,11 @@ import axios from "axios";
 import { OrganizeModel } from "./models/organize.model";
 import { CreateOrganizeDTO } from "./dto/create-organize.input";
 import { UserModel } from "./models/user.model";
+import { TreeViewModel } from "./models/treeview.model";
 
 const endpoint = "/graphql";
 
-export type TreeViewModel = {
-  id: string;
-  name: string;
-  type: string;
-  children: TreeViewModel[];
-  data?: OrganizeModel;
-};
-
-const recursiveListToTree = (tree: TreeViewModel, list: OrganizeModel[], parentId: string | null) => {
+const recursiveListToTree = (tree: TreeViewModel<OrganizeModel>, list: OrganizeModel[], parentId: string | null) => {
   const children = list.filter((x) => x.parent_id === parentId);
   // .sort((a, b) => {
   //   if (a.type == "position" && b.type != "position") {
@@ -37,8 +30,11 @@ const recursiveListToTree = (tree: TreeViewModel, list: OrganizeModel[], parentI
   });
 };
 
-export const convertOrganizeListToTree = (rootName: string = "ROOT", list: OrganizeModel[]): TreeViewModel => {
-  const root: TreeViewModel = {
+export const convertOrganizeListToTree = (
+  rootName: string = "ROOT",
+  list: OrganizeModel[]
+): TreeViewModel<OrganizeModel> => {
+  const root: TreeViewModel<OrganizeModel> = {
     id: "root",
     name: rootName,
     type: "root",
