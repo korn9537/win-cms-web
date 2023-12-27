@@ -18,12 +18,12 @@ import _ from "lodash";
 import { useEffect, useRef } from "react";
 import DialogPermission, { useDialogPermission } from "./DialogPermission";
 
-type PanelModuleProps = {
+type PanelCompanyProps = {
   refType: "role" | "user";
   refId: string;
 };
 
-export default function PanelModule(props: PanelModuleProps) {
+export default function PanelCompany(props: PanelCompanyProps) {
   // statics
   const { modules, pages, loadingPages, loadPages, setPermission, removePermission, permissions } =
     userPermissionSetttingStore((state) => {
@@ -118,9 +118,17 @@ export default function PanelModule(props: PanelModuleProps) {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>ระบบ / ฟังก์ชั่น</TableCell>
-                <TableCell width={100}>สิทธิ์</TableCell>
-                <TableCell width={30}></TableCell>
+                <TableCell>ชื่อบริษัท</TableCell>
+                <TableCell width={200} align="right">
+                  อนุญาตทั้งหมด
+                  <IOSSwitch
+                    checked={false}
+                    onChange={(e) => {}}
+                    sx={{
+                      ml: 2
+                    }}
+                  />
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody
@@ -148,10 +156,9 @@ export default function PanelModule(props: PanelModuleProps) {
                     }}
                   >
                     <TableCell>{item.name_th}</TableCell>
-                    <TableCell>
+                    <TableCell align="right">
                       <IOSSwitch checked={checked} onChange={(e) => handleChangeSwitch(e, item, hasChild)} />
                     </TableCell>
-                    <TableCell>{hasChild && <ChevronRight />}</TableCell>
                   </TableRow>
                 );
               })}

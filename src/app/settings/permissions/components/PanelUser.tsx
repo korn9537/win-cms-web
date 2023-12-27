@@ -31,6 +31,7 @@ export default function PanelUser(props: PanelUserProps) {
 
   // states
   const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState<string>("");
 
   // query
   const query = useQuery({
@@ -51,6 +52,13 @@ export default function PanelUser(props: PanelUserProps) {
   const handleSearchChange = _.debounce((value: string) => {
     setSearch(value);
   }, 500);
+
+  const handleClickRow = (item: UserModel) => {
+    console.log("handleClickRow", item);
+
+    setSelectedId(item.id);
+    props.onChange?.(item);
+  };
 
   return (
     <Stack spacing={SPACING_LAYOUT}>
@@ -83,7 +91,16 @@ export default function PanelUser(props: PanelUserProps) {
       </PageFilter>
       {/*  */}
       <TableContainer component={Paper}>
-        <Table>
+        <Table
+          sx={{
+            "& .MuiTableRow-root": {
+              ":hover, &.selected": {
+                cursor: "pointer",
+                bgcolor: (theme) => theme.palette.neutralGray[20]
+              }
+            }
+          }}
+        >
           <TableHead>
             <TableRow>
               <TableCell width={140}>รหัสพนักงาน</TableCell>
@@ -96,7 +113,13 @@ export default function PanelUser(props: PanelUserProps) {
           <TableBody>
             {users?.map((item) => {
               return (
-                <TableRow key={item.id}>
+                <TableRow
+                  key={item.id}
+                  className={item.id == selectedId ? "selected" : ""}
+                  onClick={() => {
+                    handleClickRow(item);
+                  }}
+                >
                   <TableCell>{item.code}</TableCell>
                   <TableCell>{item.fullname}</TableCell>
                   <TableCell></TableCell>

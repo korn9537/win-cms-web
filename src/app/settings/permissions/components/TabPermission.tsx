@@ -1,8 +1,9 @@
 "use client";
 
-import { Box, Tab, Tabs } from "@mui/material";
+import { Alert, Box, Tab, Tabs } from "@mui/material";
 import React, { useState } from "react";
 import PanelModule from "./PanelModule";
+import PanelCompany from "./PanelCompany";
 
 type TabPermissionProps = {
   refType: "role" | "user";
@@ -55,14 +56,10 @@ export default function TabPermission(props: TabPermissionProps) {
 
       {/*  */}
       {selectedTab === "module" && <PanelModule {...props} />}
-      {selectedTab === "company" && (
-        <Box>
-          <h1>company</h1>
-        </Box>
-      )}
+      {selectedTab === "company" && <PanelCompany {...props} />}
       {selectedTab === "project" && (
         <Box>
-          <h1>project</h1>
+          <Alert severity="warning">project</Alert>
         </Box>
       )}
       {/* {selectedTab === "deparment" && (

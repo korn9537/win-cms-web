@@ -41,7 +41,7 @@ export default function PanelRole(props: PanelRoleProps) {
     }
   });
 
-  const users = useMemo(() => {
+  const roles = useMemo(() => {
     const regex = new RegExp(search, "i");
     return query.data?.filter((item) => {
       return regex.test(item.name_th || "") || regex.test(item.code);
@@ -92,12 +92,12 @@ export default function PanelRole(props: PanelRoleProps) {
               "& .MuiTableRow-root": {
                 ":hover, &.selected": {
                   cursor: "pointer",
-                  bgcolor: "#f5f5f5"
+                  bgcolor: (theme) => theme.palette.neutralGray[20]
                 }
               }
             }}
           >
-            {users?.map((item) => {
+            {roles?.map((item) => {
               return (
                 <TableRow
                   key={item.id}

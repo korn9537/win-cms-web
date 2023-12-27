@@ -18,7 +18,7 @@ export default function SettingPermissionPage() {
   const loadPermissions = userPermissionSetttingStore((state) => state.loadPermissions);
 
   // states
-  const [selectedTab, setSelectedTab] = useState<TabType>("role"); // user | role
+  const [selectedTab, setSelectedTab] = useState<TabType>("user"); // user | role
   const [selectedId, setSelectedId] = useState<string>("");
 
   useEffect(() => {

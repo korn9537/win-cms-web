@@ -88,7 +88,11 @@ export default function DialogPermission(props: DialogPermissionProps) {
   };
 
   const handleOnChangePageSwitch = (checked: boolean, data: PermissionPageModel) => {
-    saveChangeEntity(checked, data.id, ["view"]);
+    if (checked) {
+      saveChangeEntity(checked, data.id, ["view"]);
+    } else {
+      saveChangeEntity(checked, data.id, []);
+    }
   };
 
   const handleOnClose = () => {
@@ -100,26 +104,55 @@ export default function DialogPermission(props: DialogPermissionProps) {
   // };
 
   const handleOnEntityChange = (checked: boolean, codes: string[]) => {
-    saveChangeEntity(checked, selectedPageId, codes);
+    const current = permissions[selectedPageId] || [];
+
+    console.log("current", current);
+
+    if (checked) {
+      if (codes.length == 0) {
+        codes = entities?.map((d) => d.code) || [];
+        codes.push("view");
+      } else {
+        codes = _.uniq([...current, "view", ...codes]);
+      }
+    } else {
+      if (codes.length == 0) {
+        // codes = [];
+        codes = current.includes("view") ? ["view"] : [];
+      } else {
+        codes = current.filter((d) => !codes.includes(d));
+      }
+    }
+
+    saveChangeEntity(checked, selectedPageId, _.uniq(codes));
   };
 
   const saveChangeEntity = (checked: boolean, page_id: string, codes: string[]) => {
-    if (checked) {
-      setPermission({
-        page_id: page_id,
-        ref_id: props.data?.ref_id || "",
-        ref_type: props.data?.ref_type || "",
-        entity_codes: codes
-      });
-    } else {
-      removePermission({
-        page_id: page_id,
-        ref_id: props.data?.ref_id || "",
-        ref_type: props.data?.ref_type || "",
-        entity_codes: codes
-      });
-    }
+    setPermission({
+      page_id: page_id,
+      ref_id: props.data?.ref_id || "",
+      ref_type: props.data?.ref_type || "",
+      entity_codes: _.uniq(codes)
+    });
+
+    // if (checked) {
+    //   setPermission({
+    //     page_id: page_id,
+    //     ref_id: props.data?.ref_id || "",
+    //     ref_type: props.data?.ref_type || "",
+    //     entity_codes: codes
+    //   });
+    // } else {
+    //   removePermission({
+    //     page_id: page_id,
+    //     ref_id: props.data?.ref_id || "",
+    //     ref_type: props.data?.ref_type || "",
+    //     entity_codes: codes
+    //   });
+    // }
   };
+
+  // console.log("selected codes", permissions[selectedPageId]);
 
   return (
     <Dialog
