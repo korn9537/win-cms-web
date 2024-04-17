@@ -24,6 +24,7 @@ export default function SettingRolePage() {
       toolbar={{
         title: "กลุ่มตำแหน่ง"
       }}
+      appMenuSize="large"
     >
       <Grid container spacing={SPACING_LAYOUT}>
         <Grid item xs={6}>

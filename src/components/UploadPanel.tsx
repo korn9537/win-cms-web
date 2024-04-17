@@ -1,5 +1,5 @@
 import { AddOutlined, DeleteOutline, RemoveRedEyeOutlined } from "@mui/icons-material";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, IconButton, Stack, Typography } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { filesize } from "filesize";
@@ -7,7 +7,6 @@ import { useRef, useState } from "react";
 import { IconCloud, IconFile } from "./Icons";
 
 // const initialState = {};
-
 // const reducer = (state = initialState, action: { payload: any }) => {};
 
 type UploadPanelProps = {
@@ -18,10 +17,13 @@ type UploadPanelProps = {
   folderName?: string; // images
   disabled?: boolean;
   files?: UploadFileData[];
-  // onUpload?: (data: UploadFileData, files: UploadFileData[]) => void;
-  // onDelete?: (id: string, files: UploadFileData[]) => void;
   onChange?: (files: UploadFileData[]) => void;
-  // onDownload?: () => void;
+  onUpload?: (file: UploadFileData) => void;
+  onDelete?: (file: UploadFileData) => void;
+  onDownload?: (file: UploadFileData) => void;
+  maxFileSize?: number; // MB - ขนาดไฟล์ไม่เกิน 10 MB
+  // maxTotalSize?: number; // MB - ขนาดไฟล์รวมไม่เกิน 30 MB
+  onError?: (errors: string[]) => void;
 };
 
 export type UploadFileData = {
@@ -32,9 +34,18 @@ export type UploadFileData = {
   url: string;
 };
 
-export default function UploadPanel({ type = "image", folderName = "images", ...props }: UploadPanelProps) {
+export default function UploadPanel({
+  type = "image",
+  folderName = "images",
+  maxFileSize = 10,
+  ...props
+}: UploadPanelProps) {
+  // statics
+
   // state
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   // refs
   const refUpload = useRef<HTMLInputElement>(null);
@@ -57,83 +68,116 @@ export default function UploadPanel({ type = "image", folderName = "images", ...
           "Content-Type": "multipart/form-data"
         },
         onUploadProgress: (progressEvent) => {
-          // console.log(
-          //   "progress: ",
-          //   progressEvent.loaded,
-          //   progressEvent.total,
-          //   progressEvent.loaded / progressEvent.total
-          // );
+          if (progressEvent && progressEvent.loaded && progressEvent.total) {
+            setUploadProgress((progressEvent.loaded / progressEvent.total) * 100);
+          }
         }
       });
 
       return data;
-    },
-    onSuccess(data: UploadFileData, variables, context) {
-      setFileList((prev) => [...prev, data]);
-      //
-      // props.onUpload?.(data, [...fileList, data]);
-      props.onChange?.([...fileList, data]);
     }
+    // onSuccess(data: UploadFileData, variables, context) {
+    //   setFileList((prev) => [...prev, data]);
+    //   //
+    //   // props.onUpload?.(data, [...fileList, data]);
+    //   props.onChange?.([...fileList, data]);
+    // }
   });
 
   // actions
-  const handleUploadChange = (e: any) => {
-    const files = e.target.files || [];
+  const processFiles = async (files: File[]) => {
+    setIsUploading(true);
 
-    if (files.length > 0) {
-      // upload
-      const file = files[0] as File;
-      mutation.mutate(file);
+    let dataList: UploadFileData[] = [];
+    let errors: string[] = [];
+
+    // upload
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index] as File;
+
+      if (file.size > maxFileSize * 1000 * 1000) {
+        errors.push(`${file.name}: ขนาดไฟล์เกิน ${filesize(maxFileSize * 1000 * 1000)}`);
+        continue;
+      }
+
+      // const file = files[0] as File;
+      const data: UploadFileData = await mutation.mutateAsync(file);
+      dataList.push(data);
     }
+
+    // errors
+    if (errors.length > 0) {
+      props.onError?.(errors);
+    }
+
+    //
+    const list = [...fileList, ...dataList];
+    // set state
+    setFileList(list);
+    setIsUploading(false);
+    // callbacks
+    props.onChange?.(list);
+  };
+
+  const handleUploadChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    let files: File[] = [];
+
+    const fileList = e.target.files;
+
+    if (fileList) {
+      for (let index = 0; index < fileList.length; index++) {
+        files.push(fileList[index] as File);
+      }
+    }
+
+    processFiles(files);
+
+    // reset
+    e.target.value = "";
   };
 
   const handleRemoveFile = (id: string) => {
+    const select = fileList.find((file) => file.id === id);
     const filtered = fileList.filter((file) => file.id !== id);
     //
     setFileList(filtered);
     //
-    // props.onDelete?.(id, filtered);
+    select && props.onDelete?.(select);
     props.onChange?.(filtered);
   };
 
-  const handleOnDrop = (ev: any) => {
-    setIsDragOver(false);
-
+  const handleOnDrop = (ev: React.DragEvent) => {
     // Prevent default behavior (Prevent file from being opened)
     ev.preventDefault();
 
-    let result = null;
+    setIsDragOver(false);
 
+    let files: File[] = [];
     if (ev.dataTransfer.items) {
-      // Use DataTransferItemList interface to access the file(s)
-      [...ev.dataTransfer.items].forEach((item, i) => {
-        // If dropped items aren't files, reject them
-        if (item.kind === "file") {
-          const file = item.getAsFile();
-          result = file;
-          return false;
-          //   console.log(`… file[${i}].name = ${file.name}`);
+      for (let index = 0; index < ev.dataTransfer.items.length; index++) {
+        const dataTransferItem = ev.dataTransfer.items[index];
+        if (dataTransferItem.kind === "file") {
+          files.push(dataTransferItem.getAsFile() as File);
         }
-      });
+      }
     } else {
-      // Use DataTransfer interface to access the file(s)
-      [...ev.dataTransfer.files].forEach((file, i) => {
-        result = file;
-        return false;
-        // console.log(`… file[${i}].name = ${file.name}`);
-      });
+      // // Use DataTransfer interface to access the file(s)
+      // [...ev.dataTransfer.files].forEach((file, i) => {
+      //   result = file;
+      //   return false;
+      //   // console.log(`… file[${i}].name = ${file.name}`);
+      // });
     }
 
-    handleUploadChange({ target: { files: [result] } });
+    processFiles(files);
   };
 
-  const handleOnDragOver = (ev: any) => {
+  const handleOnDragOver = (ev: React.DragEvent) => {
     ev.preventDefault();
-
     setIsDragOver(true);
   };
 
-  const handleOnDragLeave = () => {
+  const handleOnDragLeave = (ev: React.DragEvent) => {
     setIsDragOver(false);
   };
 
@@ -170,13 +214,26 @@ export default function UploadPanel({ type = "image", folderName = "images", ...
               textAlign: "center"
             }}
           >
-            <IconCloud />
-            <Typography variant="body_L_B" display="block" mt={1.5} mb={0.5}>
-              อัพโหลดไฟล์
-            </Typography>
-            <Typography variant="body_M" display="block" color="neutralGray.main">
-              ขนาดไฟล์ไม่เกิน 30 MB
-            </Typography>
+            {isUploading ? (
+              <>
+                <CircularProgress />
+                <Typography variant="body_L_B" display="block" mt={1.5} mb={0.5}>
+                  กำลังอัปโหลด...
+                </Typography>
+              </>
+            ) : (
+              <>
+                <IconCloud />
+                <Typography variant="body_L_B" display="block" mt={1.5} mb={0.5}>
+                  อัพโหลดไฟล์
+                </Typography>
+                {maxFileSize && (
+                  <Typography variant="body_M" display="block" color="neutralGray.main">
+                    ขนาดไฟล์ไม่เกิน {filesize(maxFileSize * 1000 * 1000)}
+                  </Typography>
+                )}
+              </>
+            )}
           </Box>
         </Box>
       )}
@@ -214,15 +271,24 @@ export default function UploadPanel({ type = "image", folderName = "images", ...
                     </IconButton>
                   </Box>
                   <Box>
-                    <IconButton
-                      color="primary"
-                      onClick={() => refUpload.current?.click()}
-                      sx={{
-                        visibility: index == fileList.length - 1 ? "visible" : "hidden"
-                      }}
-                    >
-                      <AddOutlined />
-                    </IconButton>
+                    {/* {isUploading && uploadProgress > 0 && (
+                      <Typography variant="body_M" color="black.60">
+                        {uploadProgress.toFixed(0)}%
+                      </Typography>
+                    )} */}
+                    {isUploading && index == fileList.length - 1 ? (
+                      <CircularProgress size="20px" />
+                    ) : (
+                      <IconButton
+                        color="primary"
+                        onClick={() => refUpload.current?.click()}
+                        sx={{
+                          visibility: index == fileList.length - 1 ? "visible" : "hidden"
+                        }}
+                      >
+                        <AddOutlined />
+                      </IconButton>
+                    )}
                   </Box>
                 </Stack>
               );

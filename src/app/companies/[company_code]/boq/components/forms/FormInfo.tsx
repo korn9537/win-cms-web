@@ -251,6 +251,7 @@ const FormInfo = forwardRef<FormInfoFowardRef, FormInfoProps>(function FormInfo(
             fileList.map((file) => file.id)
           );
         }}
+        multiple
       />
     </FormContainer>
   );

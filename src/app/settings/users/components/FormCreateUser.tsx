@@ -1,8 +1,8 @@
 import SwitchStatus, { IOSSwitch } from "@/components/SwitchStatus";
-import UploadAvatar from "@/components/UploadAvatar";
+import UploadImage from "@/components/UploadImage";
 import FormContainer from "@/components/forms/FormContainer";
 import { SPACING_FORM, SPACING_LAYOUT } from "@/constants/layout.constant";
-import { Box, FormControl, FormControlLabel, FormLabel, Grid, MenuItem, Stack, TextField } from "@mui/material";
+import { FormControl, FormControlLabel, FormLabel, Grid, MenuItem, Stack, TextField } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 
 export const defaultFormCreateUserValue: FormCreateUserValue = {
@@ -54,11 +54,15 @@ export default function FormCreateUser(props: FormCreateUserProps) {
     setValue,
     watch,
     control,
-    formState: { errors }
+    formState: { errors, isLoading }
   } = useFormContext<FormCreateUserValue>();
 
   // watches
   const logo_image_url = watch("logo_image_url");
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <Stack spacing={SPACING_LAYOUT}>
@@ -72,9 +76,9 @@ export default function FormCreateUser(props: FormCreateUserProps) {
       <FormContainer title="ข้อมูลทั่วไป">
         <Grid container spacing={SPACING_FORM}>
           <Grid item xs={12}>
-            <FormControl>
+            <FormControl fullWidth>
               <FormLabel>รูปถ่าย</FormLabel>
-              <UploadAvatar
+              <UploadImage
                 src={logo_image_url}
                 onUpload={({ id, url }: { id: string; url: string }) => {
                   setValue("logo_image_url", url);
@@ -84,9 +88,7 @@ export default function FormCreateUser(props: FormCreateUserProps) {
                   setValue("logo_image_url", "");
                   setValue("logo_image_id", "");
                 }}
-                icon={<Box component={"img"} src="/icons/no-image.png" width={24} height={24}></Box>}
-                editMode={!props.disabled}
-                buttonText="ยังไมมีรูปภาพ"
+                disabled={props.disabled}
               />
             </FormControl>
           </Grid>

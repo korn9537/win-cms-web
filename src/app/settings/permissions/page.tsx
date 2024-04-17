@@ -4,7 +4,7 @@ import PageLayout from "@/components/PageLayout";
 import { SPACING_LAYOUT } from "@/constants/layout.constant";
 import { RoleModel } from "@/services/graphql/models/role.model";
 import { UserModel } from "@/services/graphql/models/user.model";
-import { userPermissionSetttingStore } from "@/stores/permission-setting.store";
+import { userPermissionSettingStore } from "@/stores/permission-setting.store";
 import { Box, Grid, Tab, Tabs } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import PanelRole from "./components/PanelRole";
@@ -15,10 +15,10 @@ type TabType = "role" | "user";
 
 export default function SettingPermissionPage() {
   // statics
-  const loadPermissions = userPermissionSetttingStore((state) => state.loadPermissions);
+  const loadPermissions = userPermissionSettingStore((state) => state.loadPermissions);
 
   // states
-  const [selectedTab, setSelectedTab] = useState<TabType>("user"); // user | role
+  const [selectedTab, setSelectedTab] = useState<TabType>("role"); // user | role
   const [selectedId, setSelectedId] = useState<string>("");
 
   useEffect(() => {
@@ -47,6 +47,7 @@ export default function SettingPermissionPage() {
       toolbar={{
         title: "สิทธิ์การใช้งาน"
       }}
+      appMenuSize="large"
     >
       <Box
         sx={{

@@ -1829,3 +1829,22 @@ export const IconSave = (props: SvgIconProps) => (
     />
   </svg>
 );
+
+export const IconView = (props: SvgIconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="13" viewBox="0 0 19 13" fill="none">
+    <path
+      d="M12 6.5C12 5.11934 10.8807 4 9.5 4C8.11934 4 7 5.11934 7 6.5C7 7.88066 8.11934 9 9.5 9C10.8807 9 12 7.88066 12 6.5Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M17.9997 6.5C17.9997 6.5 15.2626 12 9.49973 12C3.7369 12 1 6.5 1 6.5C1 6.5 3.73717 1 9.5 1C15.2628 1 18 6.5 18 6.5H17.9997Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

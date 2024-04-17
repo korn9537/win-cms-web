@@ -1,9 +1,9 @@
-import { Search } from '@mui/icons-material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { Box, Button, ButtonBase, Stack, Typography } from '@mui/material';
-import React, { useState } from 'react';
-import { IconFilter } from './Icons';
-import PagePaper from './PagePaper';
+import { Search } from "@mui/icons-material";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { Box, Button, ButtonBase, Stack, Typography } from "@mui/material";
+import React, { useState } from "react";
+import { IconFilter } from "./Icons";
+import PagePaper from "./PagePaper";
 
 export type PageFilterProps = {
   onSearchClick?: () => void;
@@ -33,8 +33,8 @@ export default function PageFilter({
   };
 
   const paperStyle = {
-    display: showFillter ? 'block' : 'none',
-    ...sxPaper,
+    display: showFillter ? "block" : "none",
+    ...sxPaper
   };
 
   return (
@@ -60,21 +60,21 @@ export default function PageFilter({
         </Stack>
         {props.filterOther && (
           <>
-            {' '}
-            <Box sx={{ mt: '20px' }}>
-              <Stack flexDirection={'row'} spacing={'8px'} alignItems={'center'}>
+            {" "}
+            <Box sx={{ mt: "20px" }}>
+              <Stack flexDirection={"row"} spacing={"8px"} alignItems={"center"}>
                 {/* <Button variant="text" sx={{padding:0}} startIcon={ <IconFilter />} onClick={onClickButton} endIcon={<Box sx={{ display:'flex', alignItems:'center', transform: show ? 'rotate(180deg)' : 'rotate(0)' }}><IconChevronDown/></Box> }>
               คัดกรองเพิ่มเติม
               </Button> */}
-                <ButtonBase sx={{ display: 'flex', gap: 1, alignItems: 'center' }} onClick={onClickButton}>
+                <ButtonBase sx={{ display: "flex", gap: 1, alignItems: "center" }} onClick={onClickButton}>
                   <IconFilter />
-                  <Typography color={'deepBlue.80'}>คัดกรองเพิ่มเติม</Typography>
+                  <Typography color={"deepBlue.80"}>คัดกรองเพิ่มเติม</Typography>
                   <KeyboardArrowDownIcon
                     sx={{
-                      transform: show ? 'rotate(180deg)' : 'rotate(0)',
-                      width: '20px',
-                      height: '20px',
-                      transition: '0.3s all',
+                      transform: show ? "rotate(180deg)" : "rotate(0)",
+                      width: "20px",
+                      height: "20px",
+                      transition: "0.3s all"
                     }}
                   />
                 </ButtonBase>
@@ -83,14 +83,13 @@ export default function PageFilter({
             {show && (
               <Box
                 sx={{
-                  mt: '12px',
-                  pl: '20px',
+                  mt: 1.5,
+                  p: 2.5,
                   width: 1,
                   height: 112,
-                  border: '1px solid #F8F8F8 !important',
-                  backgroundColor: '#F8F8F8',
-                  borderRadius: '12px',
-                  padding: '20px 20px',
+                  border: "1px solid #F8F8F8 !important",
+                  backgroundColor: "#F8F8F8",
+                  borderRadius: "12px"
                 }}
               >
                 {props.filterOther}

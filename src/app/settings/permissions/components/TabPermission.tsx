@@ -1,9 +1,11 @@
 "use client";
 
 import { Alert, Box, Tab, Tabs } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PanelModule from "./PanelModule";
 import PanelCompany from "./PanelCompany";
+import PanelProject from "./PanelProject";
+import { userPermissionSettingStore } from "@/stores/permission-setting.store";
 
 type TabPermissionProps = {
   refType: "role" | "user";
@@ -12,6 +14,25 @@ type TabPermissionProps = {
 
 export default function TabPermission(props: TabPermissionProps) {
   // statics
+  const { loadProjects, loadCompanies } = userPermissionSettingStore((state) => ({
+    loadProjects: state.loadProjects,
+    loadCompanies: state.loadCompanies
+  }));
+
+  const loadingRef = useRef(false);
+
+  useEffect(() => {
+    const load = async () => {
+      loadingRef.current = true;
+      await loadProjects("");
+      await loadCompanies();
+      loadingRef.current = false;
+    };
+
+    if (loadingRef.current == false) {
+      load();
+    }
+  }, []);
 
   // states
   const [selectedTab, setSelectedTab] = useState("module");
@@ -33,20 +54,7 @@ export default function TabPermission(props: TabPermissionProps) {
           mb: 3
         }}
       >
-        <Tabs
-          variant="fullWidth"
-          value={selectedTab}
-          onChange={handleChangeTab}
-          // sx={{
-          //   "&": {
-          //     minHeight: "34px"
-          //   },
-          //   "& .MuiTab-root": {
-          //     py: 1,
-          //     minHeight: "34px"
-          //   }
-          // }}
-        >
+        <Tabs variant="fullWidth" value={selectedTab} onChange={handleChangeTab}>
           <Tab label="ระบบ / ฟังก์ชั่น" value="module" />
           <Tab label="บริษัท" value="company" />
           <Tab label="โครงการ" value="project" />
@@ -55,18 +63,32 @@ export default function TabPermission(props: TabPermissionProps) {
       </Box>
 
       {/*  */}
-      {selectedTab === "module" && <PanelModule {...props} />}
-      {selectedTab === "company" && <PanelCompany {...props} />}
-      {selectedTab === "project" && (
-        <Box>
-          <Alert severity="warning">project</Alert>
-        </Box>
-      )}
+      <TabContent visible={selectedTab === "module"}>
+        <PanelModule {...props} />
+      </TabContent>
+      <TabContent visible={selectedTab === "company"}>
+        <PanelCompany {...props} />
+      </TabContent>
+      <TabContent visible={selectedTab === "project"}>
+        <PanelProject {...props} />
+      </TabContent>
       {/* {selectedTab === "deparment" && (
         <Box>
           <h1>deparment</h1>
         </Box>
       )} */}
+    </Box>
+  );
+}
+
+function TabContent(props: { visible: boolean; children: React.ReactNode }) {
+  return (
+    <Box
+      sx={{
+        display: props.visible ? "block" : "none"
+      }}
+    >
+      {props.children}
     </Box>
   );
 }

@@ -348,7 +348,6 @@ export default function UploadFile({
           <input hidden accept="*" type="file" ref={refUpload} onChange={handleUploadChange} disabled={!editMode} />
         </ButtonBase>
       </Box>
-      {/* <Box>{editMode && <ButtonUploadImage onClick={() => (refUpload.current as HTMLInputElement).click()} />}</Box> */}
     </Stack>
   );
 }

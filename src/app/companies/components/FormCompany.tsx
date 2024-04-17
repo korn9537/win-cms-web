@@ -1,6 +1,6 @@
 import FormTitle from "@/components/FormTitle";
 import PanelSelect from "@/components/PanelSelect";
-import UploadAvatar from "@/components/UploadAvatar";
+import UploadImage from "@/components/UploadImage";
 import FormAddress, { FormAddressValue, defaultFormAddressValue } from "@/components/forms/FormAddress";
 import { SPACING_FORM, SPACING_LAYOUT } from "@/constants/layout.constant";
 import { Box, Checkbox, Divider, FormControlLabel, Grid, Stack, TextField, Typography, useTheme } from "@mui/material";
@@ -76,7 +76,7 @@ export default function FormCompany({ disabled = false }: FormCompanyProps) {
           <Stack flexDirection={"column"}>
             <Typography variant="body_M">โลโก้บริษัท</Typography>
             <Stack flexDirection={"row"} spacing={2.5} alignItems={"center"}>
-              <UploadAvatar
+              <UploadImage
                 src={logo_image_url}
                 onUpload={({ id, url }: { id: string; url: string }) => {
                   setValue("logo_image_url", url);
@@ -86,9 +86,7 @@ export default function FormCompany({ disabled = false }: FormCompanyProps) {
                   setValue("logo_image_url", "");
                   setValue("logo_image_id", "");
                 }}
-                icon={<Box component={"img"} src="/icons/no-image.png" width={24} height={24}></Box>}
-                editMode={!disabled}
-                buttonText="ยังไมมีรูปภาพ"
+                disabled={disabled}
               />
             </Stack>
           </Stack>
@@ -97,7 +95,7 @@ export default function FormCompany({ disabled = false }: FormCompanyProps) {
           <Stack flexDirection={"column"}>
             <Typography variant="body_M">ตราประทับบริษัท</Typography>
             <Stack flexDirection={"row"} spacing={2.5} alignItems={"center"}>
-              <UploadAvatar
+              <UploadImage
                 src={corporate_crest_url}
                 onUpload={({ id, url }: { id: string; url: string }) => {
                   setValue("corporate_crest_url", url);
@@ -107,9 +105,7 @@ export default function FormCompany({ disabled = false }: FormCompanyProps) {
                   setValue("corporate_crest_url", "");
                   setValue("corporate_crest_id", "");
                 }}
-                icon={<Box component={"img"} src="/icons/no-image.png" width={24} height={24}></Box>}
-                editMode={!disabled}
-                buttonText="ยังไมมีรูปภาพ"
+                disabled={disabled}
               />
             </Stack>
           </Stack>

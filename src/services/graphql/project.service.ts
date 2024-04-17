@@ -39,7 +39,14 @@ export const getProjects = async (
     query projects($companyId: String!, $search: String!, $type: String!, $status: String!, $page: Int!, $pageSize: Int!) {
       projects(companyId: $companyId, search: $search, projectType: $type, status: $status, page: $page, limit: $pageSize) {
         items {
-          id code name_th type status acronym is_active
+          id 
+          code 
+          name_th 
+          type 
+          status 
+          acronym 
+          is_active 
+          company_id
         }
         page
         totalCount

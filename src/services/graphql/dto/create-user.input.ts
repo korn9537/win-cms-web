@@ -17,7 +17,7 @@ export type CreateUserDTO = {
 
   is_active?: boolean;
 
-  image_id?: string;
+  image_id?: string | null;
 
   position_id?: string;
 

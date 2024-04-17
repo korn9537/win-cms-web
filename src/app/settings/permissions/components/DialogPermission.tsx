@@ -3,7 +3,7 @@ import ButtonCloseDialog from "@/components/dialogs/ButtonCloseDialog";
 import { SPACING_FORM } from "@/constants/layout.constant";
 import { UseDialogProps, useDialog } from "@/hooks/useDialog";
 import { PermissionEntityModel, PermissionPageModel } from "@/services/graphql/models/permission.model";
-import { userPermissionSetttingStore } from "@/stores/permission-setting.store";
+import { userPermissionSettingStore } from "@/stores/permission-setting.store";
 import {
   Box,
   DialogContent,
@@ -44,7 +44,7 @@ export default function DialogPermission(props: DialogPermissionProps) {
 
   // states
   const { pages, entities, loadEntities, loadingEntities, setPermission, removePermission, permissions } =
-    userPermissionSetttingStore((state) => {
+    userPermissionSettingStore((state) => {
       const pages = state.pages.filter((p) => p.parent_id == data?.page_id);
       // const permissions = _.pick(
       //   state.permissions,
@@ -289,7 +289,7 @@ type PageRowCollapseProps = {
 function PageRowCollapse(props: PageRowCollapseProps) {
   // statics
   const { data } = props;
-  const { pages, checked } = userPermissionSetttingStore((state) => {
+  const { pages, checked } = userPermissionSettingStore((state) => {
     const checked = state.permissions[data.id]?.includes("view") || false;
 
     return {

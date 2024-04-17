@@ -7,6 +7,7 @@ export type ProjectModel = {
   image_url: string;
   status: string;
   is_active: boolean;
+  company_id: string;
 };
 
 export type ProjectInfoModel = ProjectModel & {

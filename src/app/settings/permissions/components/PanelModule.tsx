@@ -1,6 +1,6 @@
 import { IOSSwitch } from "@/components/SwitchStatus";
 import { PermissionPageModel } from "@/services/graphql/models/permission.model";
-import { userPermissionSetttingStore } from "@/stores/permission-setting.store";
+import { userPermissionSettingStore } from "@/stores/permission-setting.store";
 import { ChevronRight } from "@mui/icons-material";
 import {
   Alert,
@@ -26,7 +26,7 @@ type PanelModuleProps = {
 export default function PanelModule(props: PanelModuleProps) {
   // statics
   const { modules, pages, loadingPages, loadPages, setPermission, removePermission, permissions } =
-    userPermissionSetttingStore((state) => {
+    userPermissionSettingStore((state) => {
       const modules = state.pages.filter((item) => item.level == 1);
       const permissions = _.pick(
         state.permissions,
@@ -84,12 +84,18 @@ export default function PanelModule(props: PanelModuleProps) {
         entity_codes: ["view"]
       });
     } else {
-      removePermission({
+      setPermission({
         page_id: item.id,
         ref_id: props.refId,
         ref_type: props.refType,
-        entity_codes: ["view"]
+        entity_codes: []
       });
+      // removePermission({
+      //   page_id: item.id,
+      //   ref_id: props.refId,
+      //   ref_type: props.refType,
+      //   entity_codes: ["view"]
+      // });
     }
 
     // if (e.target.checked && hasChild) {

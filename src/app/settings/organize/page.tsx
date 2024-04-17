@@ -42,6 +42,7 @@ export default function SettingOrganizePage() {
       toolbar={{
         title: "ผังองค์กร"
       }}
+      appMenuSize="large"
     >
       <Grid container spacing={SPACING_LAYOUT}>
         <Grid item xs={6}>
@@ -69,7 +70,7 @@ function PanelOrganizeUsers(props: PanelOrganizeUsersProps) {
     showToast: state.showToast
   }));
 
-  const dialogSelectUser = useDialog({
+  const dialogSelectUser = useDialog<any, any>({
     onConfirm: async (data, dialog, res) => {
       try {
         await mutateSaveUser.mutateAsync(res);

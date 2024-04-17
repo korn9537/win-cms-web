@@ -284,3 +284,59 @@ type RefPermissionModel = {
   page_id: string;
   entity_code: string;
 };
+
+export const getCompanyPermissionByRefId = async (
+  ref_id: string,
+  ref_type: string,
+  page_id: string | null
+): Promise<string[]> => {
+  const query = `
+    query getPermissionByRefId($ref_id: String!, $ref_type: String!, $page_id: String) {
+        getPermissionByRefId(ref_id: $ref_id, ref_type: $ref_type, page_id: $page_id) {
+          page_id
+          entity_code
+        }
+    }
+`;
+
+  const {
+    data: { data, errors }
+  } = await axios.post(endpoint, {
+    query: compactQuery(query),
+    variables: {
+      ref_id: ref_id,
+      ref_type: ref_type,
+      page_id: page_id
+    }
+  });
+
+  return data.getPermissionByRefId;
+};
+
+export const getProjectPermissionByRefId = async (
+  ref_id: string,
+  ref_type: string,
+  page_id: string | null
+): Promise<string[]> => {
+  const query = `
+    query getPermissionByRefId($ref_id: String!, $ref_type: String!, $page_id: String) {
+        getPermissionByRefId(ref_id: $ref_id, ref_type: $ref_type, page_id: $page_id) {
+          page_id
+          entity_code
+        }
+    }
+`;
+
+  const {
+    data: { data, errors }
+  } = await axios.post(endpoint, {
+    query: compactQuery(query),
+    variables: {
+      ref_id: ref_id,
+      ref_type: ref_type,
+      page_id: page_id
+    }
+  });
+
+  return data.getPermissionByRefId;
+};

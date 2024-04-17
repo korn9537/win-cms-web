@@ -78,7 +78,8 @@ export default function SettingUserInfoPage(props: SettingUserInfoPageProps) {
         is_active: values.is_active,
         department_id: values.department_id,
         position_id: values.position_id,
-        role_ids: values.role_ids
+        role_ids: values.role_ids,
+        image_id: values.logo_image_id
       };
       await updateUserMutation.mutateAsync(body);
 

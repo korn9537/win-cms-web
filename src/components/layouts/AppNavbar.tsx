@@ -152,7 +152,7 @@ export default function AppNavbar({ hideModuleSelector = false, ...props }: AppN
           {/* Account */}
           <Box>
             <ButtonBase sx={{ display: "flex", alignItems: "center", gap: 2 }} onClick={handleOpenUserMenu}>
-              <Avatar alt="user" src="/icons/User.png" sx={{ width: 32, height: 32 }} />
+              <Avatar alt="user" src={profile?.thumbnail || "/icons/User.png"} sx={{ width: 32, height: 32 }} />
               <Box>
                 <Typography fontSize={15} fontWeight={700}>
                   {profile?.fullname}

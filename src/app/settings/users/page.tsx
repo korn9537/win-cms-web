@@ -127,7 +127,16 @@ export default function SettingUserPage() {
               {query.data?.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
-                    <img src="/icons/User.png" alt="" />
+                    <img
+                      src={user.thumbnail || "/icons/User.png"}
+                      alt=""
+                      width={32}
+                      height={32}
+                      style={{
+                        borderRadius: "50%",
+                        objectFit: "cover"
+                      }}
+                    />
                   </TableCell>
                   <TableCell>{user.code}</TableCell>
                   <TableCell>{user.fullname}</TableCell>

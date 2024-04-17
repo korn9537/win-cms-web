@@ -2,12 +2,12 @@
 
 import PageLayout from "@/components/PageLayout";
 import PagePaper from "@/components/PagePaper";
-import { SPACING_FORM, SPACING_LAYOUT } from "@/constants/layout.constant";
+import { SPACING_LAYOUT } from "@/constants/layout.constant";
+import { PermissionPageModel } from "@/services/graphql/models/permission.model";
 import { Grid, Typography } from "@mui/material";
+import { useState } from "react";
 import ModuleTree from "./components/ModuleTree";
 import PermissionPanel from "./components/PermissionPanel";
-import { useState } from "react";
-import { PermissionPageModel } from "@/services/graphql/models/permission.model";
 
 export default function SettingModulesPage() {
   // statics
@@ -25,6 +25,7 @@ export default function SettingModulesPage() {
       toolbar={{
         title: "ตั้งค่าโมดูลในระบบ"
       }}
+      appMenuSize="large"
     >
       <Grid container spacing={SPACING_LAYOUT}>
         <Grid item xs={6}>
@@ -37,7 +38,7 @@ export default function SettingModulesPage() {
         </Grid>
         <Grid item xs={6}>
           <PagePaper sx={{ height: "100%" }}>
-            <PermissionPanel pageId={selectedNode?.id} />
+            <PermissionPanel pageId={selectedNode?.id || ""} />
           </PagePaper>
         </Grid>
       </Grid>

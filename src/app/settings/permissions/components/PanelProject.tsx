@@ -1,30 +1,42 @@
+import PageFilter from "@/components/PageFilter";
 import { IOSSwitch } from "@/components/SwitchStatus";
-import { getCompanies } from "@/services/graphql/company.service";
-import { CompanyModel } from "@/services/graphql/models/company.model";
+import { SPACING_FORM } from "@/constants/layout.constant";
+import { ProjectModel } from "@/services/graphql/models/project.model";
 import { userPermissionSettingStore } from "@/stores/permission-setting.store";
 import {
   Alert,
-  Box,
+  MenuItem,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography
 } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-type PanelCompanyProps = {
+type PanelProjectProps = {
   refType: "role" | "user";
   refId: string;
 };
 
-export default function PanelCompany(props: PanelCompanyProps) {
+export default function PanelProject(props: PanelProjectProps) {
   // statics
-  const { companies, loadCompanies, loadingCompanies } = userPermissionSettingStore((state) => ({
+  const {
+    projects: items,
+    loadProjects,
+    loadingProjects,
+    companies,
+    loadCompanies,
+    loadingCompanies
+  } = userPermissionSettingStore((state) => ({
+    projects: state.projects,
+    loadProjects: state.loadProjects,
+    loadingProjects: state.loadingProjects,
     companies: state.companies,
     loadCompanies: state.loadCompanies,
     loadingCompanies: state.loadingCompanies
@@ -35,29 +47,39 @@ export default function PanelCompany(props: PanelCompanyProps) {
   // useEffect(() => {
   //   const load = async () => {
   //     loadingRef.current = true;
-  //     await loadCompanies();
+  //     loadProjects("");
+  //     loadCompanies();
   //     loadingRef.current = false;
   //   };
 
-  //   if (loadingRef.current == false && companies.length == 0) {
+  //   if (loadingRef.current == false && items.length == 0) {
   //     load();
   //   }
   // }, []);
 
   // states
+  const [companyId, setCompanyId] = useState<string>("");
 
-  // queries
+  const projects = useMemo(() => {
+    if (companyId == "") {
+      return items;
+    }
+
+    return items.filter((item) => {
+      return item.company_id == companyId;
+    });
+  }, [items, companyId]);
 
   // mutations
 
   // actions
-  const handleClickRow = (e: React.MouseEvent<HTMLElement>, item: CompanyModel) => {
+  const handleClickRow = (e: React.MouseEvent<HTMLElement>, item: ProjectModel) => {
     if (e.target instanceof HTMLInputElement) {
       return;
     }
   };
 
-  const handleChangeSwitch = (e: React.ChangeEvent<HTMLInputElement>, item: CompanyModel) => {
+  const handleChangeSwitch = (e: React.ChangeEvent<HTMLInputElement>, item: ProjectModel) => {
     e.stopPropagation();
 
     // if (e.target.checked) {
@@ -81,13 +103,34 @@ export default function PanelCompany(props: PanelCompanyProps) {
     // }
   };
 
+  // render
   if (props.refId == "") {
-    return <Alert severity="info">กรุณาเลือกกลุ่มตำแหน่ง</Alert>;
+    return <Alert severity="info">กรุณาเลือกกลุ่มตำแหน่ง / ผู้ใช้งาน</Alert>;
   }
 
   return (
-    <Box>
-      {loadingCompanies ? (
+    <Stack spacing={SPACING_FORM}>
+      {/* Filter */}
+      <PageFilter showSearchButton={false}>
+        <TextField
+          label="บริษัท"
+          select
+          onChange={(e) => {
+            setCompanyId(e.target.value);
+          }}
+        >
+          <MenuItem value="">ทั้งหมด</MenuItem>
+          {companies?.map((item) => {
+            return (
+              <MenuItem key={"select-comp-" + item.id} value={item.id}>
+                {item.name_th}
+              </MenuItem>
+            );
+          })}
+        </TextField>
+      </PageFilter>
+      {/* Table */}
+      {loadingProjects ? (
         <Typography>loading...</Typography>
       ) : (
         <TableContainer component={Paper}>
@@ -111,13 +154,13 @@ export default function PanelCompany(props: PanelCompanyProps) {
               sx={{
                 "& .MuiTableRow-root": {
                   "&:hover": {
-                    backgroundColor: "#f5f5f5"
+                    backgroundColor: (theme) => theme.palette.neutralGray[20]
                   },
                   cursor: "pointer"
                 }
               }}
             >
-              {companies?.map((item) => {
+              {projects?.map((item) => {
                 const checked = false;
 
                 return (
@@ -133,6 +176,6 @@ export default function PanelCompany(props: PanelCompanyProps) {
           </Table>
         </TableContainer>
       )}
-    </Box>
+    </Stack>
   );
 }
